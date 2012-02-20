@@ -6743,6 +6743,38 @@ public final class Settings {
         public static final String HIDE_BATTERY_ICON = "hide_battery_icon";
 
         /**
+         * Whether to use the custom quick unlock screen control
+         * @hide
+         */
+        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
+
+        /**
+         * Vibrate when expanding notifications
+         * @hide
+         */
+        public static final String VIBRATE_NOTIF_EXPAND = "vibrate_notif_expand";
+
+        /**
+         * Whether to show statusbar signal text
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_SIGNAL_TEXT = "statusbar_signal_text";
+
+        /**
+         * statusbar signal text color
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_SIGNAL_TEXT_COLOR = "statusbar_signal_text_color";
+
+        /**
+         * The hostname for this device
+         * @hide
+         */
+        public static final String DEVICE_HOSTNAME = "device_hostname";
+
+        /**
          * enable and disable fast toggle in settings
          *
          * @hide
