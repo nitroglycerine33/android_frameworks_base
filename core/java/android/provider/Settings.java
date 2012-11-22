@@ -6779,6 +6779,13 @@ public final class Settings {
          *@hide
          */
         public static final String RAM_USAGE_BAR = "ram_usage_bar";
+
+       /**
+         * Whether to enable swiping your finger across the statusbar to change the brightness.
+         * Boolean value. Defaults to true.
+         */
+        public static final String STATUSBAR_ENABLE_BRIGHTNESS_SLIDER = "statusbar_enable_brightness_slider";
+
     }
 
     /**
