@@ -43,7 +43,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ThemeUtils;
 
-import com.android.internal.os.IDeviceHandler;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.view.IInputContext;
@@ -331,7 +330,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mLimitedAlphaCompositing;
 
-    final WindowManagerPolicy mPolicy;
+    final WindowManagerPolicy mPolicy = PolicyManager.makeNewWindowManager();
 
     final IActivityManager mActivityManager;
 
@@ -770,7 +769,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
-            final InputManagerService im, final IDeviceHandler device,
+            final InputManagerService im,
             final Handler uiHandler, final Handler wmHandler,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
@@ -779,7 +778,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 holder[0] = new WindowManagerService(context, pm, dm, im,
-                        device, uiHandler, haveInputMethods, showBootMsgs, onlyCore);
+                        uiHandler, haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
         return holder[0];
@@ -801,7 +800,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, PowerManagerService pm,
             DisplayManagerService displayManager, InputManagerService inputManager,
-            IDeviceHandler device, Handler uiHandler,
+            Handler uiHandler,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -811,7 +810,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mDisplayManagerService = displayManager;
         mHeadless = displayManager.isHeadless();
-        mPolicy = PolicyManager.makeNewWindowManager(device);
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, null);
@@ -1620,9 +1618,8 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
-        final DisplayInfo displayInfo = getDefaultDisplayContentLocked().getDisplayInfo();
-        final int dw = displayInfo.appWidth;
-        final int dh = displayInfo.appHeight;
+        final int dw = mPolicy.getWallpaperWidth(mRotation);
+        final int dh = mPolicy.getWallpaperHeight(mRotation);
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
@@ -1879,7 +1876,6 @@ public class WindowManagerService extends IWindowManager.Stub
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
-
                 if (visible) {
                     updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
@@ -2043,10 +2039,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final DisplayContent displayContent = changingTarget.mDisplayContent;
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final int dw = displayInfo.appWidth;
-        final int dh = displayInfo.appHeight;
+        final int dw = mPolicy.getWallpaperWidth(mRotation);
+        final int dh = mPolicy.getWallpaperHeight(mRotation);
 
         WindowState target = mWallpaperTarget;
         if (target != null) {
@@ -4179,8 +4173,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStartingIconInTransition = false;
                 mSkipAppTransitionAnimation = false;
                 mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-                mH.sendMessageDelayed(mH.obtainMessage(H.APP_TRANSITION_TIMEOUT),
-                        5000);
+                mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, 5000);
             }
         }
     }
@@ -4751,8 +4744,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppsFreezingScreen == 1) {
                     startFreezingDisplayLocked(false, 0, 0);
                     mH.removeMessages(H.APP_FREEZE_TIMEOUT);
-                    mH.sendMessageDelayed(mH.obtainMessage(H.APP_FREEZE_TIMEOUT),
-                            5000);
+                    mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 5000);
                 }
             }
             final int N = wtoken.allAppWindows.size();
@@ -5272,8 +5264,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     startFreezingDisplayLocked(false, exitAnim, enterAnim);
                     mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
-                    mH.sendMessageDelayed(mH.obtainMessage(H.CLIENT_FREEZE_TIMEOUT),
-                            5000);
+                    mH.sendEmptyMessageDelayed(H.CLIENT_FREEZE_TIMEOUT, 5000);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -5401,7 +5392,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Persist setting
-        mH.obtainMessage(H.PERSIST_ANIMATION_SCALE).sendToTarget();
+        mH.sendEmptyMessage(H.PERSIST_ANIMATION_SCALE);
     }
 
     public void setAnimationScales(float[] scales) {
@@ -5423,7 +5414,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Persist setting
-        mH.obtainMessage(H.PERSIST_ANIMATION_SCALE).sendToTarget();
+        mH.sendEmptyMessage(H.PERSIST_ANIMATION_SCALE);
     }
 
     private void setAnimatorDurationScale(float scale) {
@@ -5539,8 +5530,7 @@ public class WindowManagerService extends IWindowManager.Stub
             hideBootMessagesLocked();
             // If the screen still doesn't come up after 30 seconds, give
             // up and turn it on.
-            Message msg = mH.obtainMessage(H.BOOT_TIMEOUT);
-            mH.sendMessageDelayed(msg, 30*1000);
+            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30*1000);
         }
 
         mPolicy.systemBooted();
@@ -5563,7 +5553,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!mSystemBooted && !mShowingBootMessages) {
             return;
         }
-        mH.sendMessage(mH.obtainMessage(H.ENABLE_SCREEN));
+        mH.sendEmptyMessage(H.ENABLE_SCREEN);
     }
 
     public void performBootTimeout() {
@@ -6142,7 +6132,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-        mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
+        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
                 WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
@@ -7674,8 +7664,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (mAnimator.mAnimating || mLayoutToAnim.mAnimationScheduled) {
                                 // If we are animating, don't do the gc now but
                                 // delay a bit so we don't interrupt the animation.
-                                mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
-                                        2000);
+                                sendEmptyMessageDelayed(H.FORCE_GC, 2000);
                                 return;
                             }
                             // If we are currently rotating the display, it will
@@ -7800,7 +7789,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
                         if (copyAnimToLayoutParamsLocked()) {
-                            mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
+                            sendEmptyMessage(CLEAR_PENDING_ACTIONS);
                             performLayoutAndPlaceSurfacesLocked();
                         }
                     }
@@ -8389,7 +8378,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mWindowsChanged && !mWindowChangeListeners.isEmpty()) {
                 mH.removeMessages(H.REPORT_WINDOWS_CHANGE);
-                mH.sendMessage(mH.obtainMessage(H.REPORT_WINDOWS_CHANGE));
+                mH.sendEmptyMessage(H.REPORT_WINDOWS_CHANGE);
             }
         } catch (RuntimeException e) {
             mInLayout = false;
@@ -8585,8 +8574,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // XXX should probably keep timeout from
                 // when we first froze the display.
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-                mH.sendMessageDelayed(mH.obtainMessage(
-                        H.WINDOW_FREEZE_TIMEOUT), WINDOW_FREEZE_TIMEOUT_DURATION);
+                mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, 
+                        WINDOW_FREEZE_TIMEOUT_DURATION);
             }
         }
     }
@@ -10263,8 +10252,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // processes holds on others can be released if they are
         // no longer needed.
         mH.removeMessages(H.FORCE_GC);
-        mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
-                2000);
+        mH.sendEmptyMessageDelayed(H.FORCE_GC, 2000);
 
         mScreenFrozenLock.release();
         

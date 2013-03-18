@@ -167,9 +167,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // effectively and terminate the dream.
     private static final int DREAM_BATTERY_LEVEL_DRAIN_CUTOFF = 5;
 
-    // Max time (microseconds) to allow a CPU boost for
-    private static final int MAX_CPU_BOOST_TIME = 5000000;
-
     private Context mContext;
     private LightsService mLightsService;
     private BatteryService mBatteryService;
@@ -185,7 +182,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     private DreamManagerService mDreamManager;
     private LightsService.Light mAttentionLight;
     private LightsService.Light mButtonsLight;
-    private LightsService.Light mKeyboardLight;
 
     private final Object mLock = new Object();
 
@@ -293,6 +289,10 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Default value for dreams activate-on-dock
     private boolean mDreamsActivatedOnDockByDefaultConfig;
 
+    // True if we should fade the screen while turning it off, false if we should play
+    // a stylish electron beam animation instead.
+    private boolean mElectronBeamFadesConfig;
+
     // True if dreams are enabled by the user.
     private boolean mDreamsEnabledSetting;
 
@@ -304,6 +304,12 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
+
+    // Override config for ElectronBeam on or off
+    // used here to send values to DispLayPowerController handler
+    // from SettingsObserver
+    private boolean mElectronBeamOnEnabled;
+    private boolean mElectronBeamOffEnabled;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
@@ -374,8 +380,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeReleaseSuspendBlocker(String name);
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
-    private static native void nativeCpuBoost(int duration);
-    private boolean mKeyboardVisible = false;
 
     public PowerManagerService() {
         synchronized (mLock) {
@@ -454,7 +458,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
             mButtonsLight = mLightsService.getLight(LightsService.LIGHT_ID_BUTTONS);
-            mKeyboardLight = mLightsService.getLight(LightsService.LIGHT_ID_KEYBOARD);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -501,6 +504,12 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_POWER_ENABLE_CRT_ON),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
 
             // Go.
             readConfigurationLocked();
@@ -523,6 +532,8 @@ public final class PowerManagerService extends IPowerManager.Stub
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefaultConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mElectronBeamFadesConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_animateScreenLights);
     }
 
     private void updateSettingsLocked() {
@@ -545,6 +556,12 @@ public final class PowerManagerService extends IPowerManager.Stub
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
+
+        // respect default config values
+        mElectronBeamOnEnabled = Settings.System.getInt(resolver,
+                Settings.System.SYSTEM_POWER_ENABLE_CRT_ON, 0) == 1;
+        mElectronBeamOffEnabled = Settings.System.getInt(resolver,
+                Settings.System.SYSTEM_POWER_ENABLE_CRT_OFF, mElectronBeamFadesConfig ? 0 : 1) == 1;
 
         final int oldScreenBrightnessSetting = mScreenBrightnessSetting;
         mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
@@ -894,18 +911,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     }
 
     @Override // Binder call
-    public void setKeyboardVisibility(boolean visible) {
-        synchronized (mLock) {
-            if (DEBUG_SPEW) {
-                Slog.d(TAG, "setKeyboardVisibility: " + visible);
-            }
-            if (mKeyboardVisible != visible) {
-                mKeyboardVisible = visible;
-            }
-        }
-    }
-
-    @Override // Binder call
     public void wakeUp(long eventTime) {
         if (eventTime > SystemClock.uptimeMillis()) {
             throw new IllegalArgumentException("event time must not be in the future");
@@ -1223,6 +1228,11 @@ public final class PowerManagerService extends IPowerManager.Stub
             return false;
         }
 
+        if (!Settings.System.getBoolean(mContext.getContentResolver(),
+                Settings.System.WAKEUP_WHEN_PLUGGED_UNPLUGGED, true)) {
+            return false;
+        }
+
         // Otherwise wake up!
         return true;
     }
@@ -1329,13 +1339,11 @@ public final class PowerManagerService extends IPowerManager.Stub
                     if (now < nextTimeout) {
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
-                            mKeyboardLight.setBrightness(0);
                         } else {
                             int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
                                     ? mButtonBrightnessOverrideFromWindowManager
                                     : mDisplayPowerRequest.screenBrightness;
                             mButtonsLight.setBrightness(brightness);
-                            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
                             if (brightness != 0) {
                                 nextTimeout = now + BUTTON_ON_DURATION;
                             }
@@ -1674,6 +1682,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
 
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
+            mDisplayPowerRequest.electronBeamOnEnabled = mElectronBeamOnEnabled;
+            mDisplayPowerRequest.electronBeamOffEnabled = mElectronBeamOffEnabled;
 
             mDisplayReady = mDisplayPowerController.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
@@ -1861,20 +1871,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             shutdownOrRebootInternal(true, confirm, null, wait);
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    /**
-     * Boost the CPU
-     * @param duration Duration to boost the CPU for, in milliseconds.
-     * @hide
-     */
-    @Override // Binder call
-    public void cpuBoost(int duration) {
-        if (duration > 0 && duration <= MAX_CPU_BOOST_TIME) {
-            nativeCpuBoost(duration);
-        } else {
-            Log.e(TAG, "Invalid boost duration: " + duration);
         }
     }
 

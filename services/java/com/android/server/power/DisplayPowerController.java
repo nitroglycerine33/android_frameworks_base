@@ -23,24 +23,18 @@ import com.android.server.display.DisplayManagerService;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
-import android.hardware.display.DisplayManager;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.FloatMath;
 import android.util.Slog;
@@ -173,9 +167,6 @@ final class DisplayPowerController {
     // The display blanker.
     private final DisplayBlanker mDisplayBlanker;
 
-    // Our context
-    private final Context mContext;
-
     // Our handler.
     private final DisplayControllerHandler mHandler;
 
@@ -226,6 +217,10 @@ final class DisplayPowerController {
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish electron beam animation instead.
     private boolean mElectronBeamFadesConfig;
+
+    // Override config for ElectronBeam on or off
+    private boolean mElectronBeamOnEnabled;
+    private boolean mElectronBeamOffEnabled;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -348,7 +343,6 @@ final class DisplayPowerController {
 
     // Twilight changed.  We might recalculate auto-brightness values.
     private boolean mTwilightChanged;
-    private boolean mAutoBrightnessSettingsChanged;
 
     /**
      * Creates the display power controller.
@@ -358,7 +352,6 @@ final class DisplayPowerController {
             DisplayManagerService displayManager,
             DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
-        mContext = context;
         mHandler = new DisplayControllerHandler(looper);
         mNotifier = notifier;
         mDisplayBlanker = displayBlanker;
@@ -379,34 +372,35 @@ final class DisplayPowerController {
                 com.android.internal.R.integer.config_screenBrightnessSettingMinimum),
                 mScreenBrightnessDimConfig);
 
-        mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
-        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
-
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
-
         if (mUseSoftwareAutoBrightnessConfig) {
-            final ContentResolver cr = mContext.getContentResolver();
-            final ContentObserver observer = new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange, Uri uri) {
-                    mAutoBrightnessSettingsChanged = true;
-                    updateAutomaticBrightnessSettings();
-                    updatePowerState();
-                }
-            };
+            int[] lux = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLevels);
+            int[] screenBrightness = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
 
-            cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.AUTO_BRIGHTNESS_LUX),
-                    false, observer, UserHandle.USER_ALL);
-            cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.AUTO_BRIGHTNESS_BACKLIGHT),
-                    false, observer, UserHandle.USER_ALL);
+            mScreenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
+            if (mScreenAutoBrightnessSpline == null) {
+                Slog.e(TAG, "Error in config.xml.  config_autoBrightnessLcdBacklightValues "
+                        + "(size " + screenBrightness.length + ") "
+                        + "must be monotic and have exactly one more entry than "
+                        + "config_autoBrightnessLevels (size " + lux.length + ") "
+                        + "which must be strictly increasing.  "
+                        + "Auto-brightness will be disabled.");
+                mUseSoftwareAutoBrightnessConfig = false;
+            } else {
+                if (screenBrightness[0] < screenBrightnessMinimum) {
+                    screenBrightnessMinimum = screenBrightness[0];
+                }
+            }
 
             mLightSensorWarmUpTimeConfig = resources.getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
-            updateAutomaticBrightnessSettings();
         }
+
+        mScreenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightnessMinimum);
+        mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
 
         mElectronBeamFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
@@ -429,62 +423,6 @@ final class DisplayPowerController {
         }
     }
 
-    private void updateAutomaticBrightnessSettings() {
-        int[] lux = getIntArrayForSetting(Settings.System.AUTO_BRIGHTNESS_LUX);
-        int[] values = getIntArrayForSetting(Settings.System.AUTO_BRIGHTNESS_BACKLIGHT);
-        Resources res = mContext.getResources();
-
-        mScreenAutoBrightnessSpline = null;
-        mUseSoftwareAutoBrightnessConfig = true;
-
-        if (lux != null && values != null) {
-            mScreenAutoBrightnessSpline = createAutoBrightnessSpline(lux, values);
-            if (mScreenAutoBrightnessSpline == null) {
-                Slog.w(TAG, "Found invalid auto-brightness configuration, falling back to default");
-            }
-        }
-
-        if (mScreenAutoBrightnessSpline == null) {
-            lux = res.getIntArray(com.android.internal.R.array.config_autoBrightnessLevels);
-            values = res.getIntArray(com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
-            mScreenAutoBrightnessSpline = createAutoBrightnessSpline(lux, values);
-        }
-
-        if (mScreenAutoBrightnessSpline == null) {
-            Slog.e(TAG, "Error in config.xml.  config_autoBrightnessLcdBacklightValues "
-                    + "(size " + values.length + ") "
-                    + "must be monotic and have exactly one more entry than "
-                    + "config_autoBrightnessLevels (size " + lux.length + ") "
-                    + "which must be strictly increasing.  "
-                    + "Auto-brightness will be disabled.");
-            mUseSoftwareAutoBrightnessConfig = false;
-            return;
-        }
-    }
-
-    private int[] getIntArrayForSetting(String setting) {
-        final String value = Settings.System.getStringForUser(
-                mContext.getContentResolver(), setting, UserHandle.USER_CURRENT);
-        if (value == null) {
-            return null;
-        }
-        String[] items = value.split(",");
-        if (items == null || items.length == 0) {
-            return null;
-        }
-
-        int[] values = new int[items.length];
-        for (int i = 0; i < items.length; i++) {
-            try {
-                values[i] = Integer.valueOf(items[i]);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        return values;
-    }
-
     private static Spline createAutoBrightnessSpline(int[] lux, int[] brightness) {
         try {
             final int n = brightness.length;
@@ -494,12 +432,6 @@ final class DisplayPowerController {
             for (int i = 1; i < n; i++) {
                 x[i] = lux[i - 1];
                 y[i] = normalizeAbsoluteBrightness(brightness[i]);
-            }
-
-            if (DEBUG) {
-                for (int i = 0; i < n; i++) {
-                    Slog.d(TAG, "Spline data[" + i + "]: x = " + x[i] + " y = " + y[i]);
-                }
             }
 
             Spline spline = Spline.createMonotoneCubicSpline(x, y);
@@ -628,11 +560,9 @@ final class DisplayPowerController {
         // Update the power state request.
         final boolean mustNotify;
         boolean mustInitialize = false;
-        boolean updateAutoBrightness = mTwilightChanged || mAutoBrightnessSettingsChanged;
+        boolean updateAutoBrightness = mTwilightChanged;
         boolean wasDim = false;
-
         mTwilightChanged = false;
-        mAutoBrightnessSettingsChanged = false;
 
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
@@ -661,6 +591,10 @@ final class DisplayPowerController {
 
             mustNotify = !mDisplayReadyLocked;
         }
+
+        // update crt settings here, it's only two bools
+        mElectronBeamOnEnabled = mPowerRequest.electronBeamOnEnabled;
+        mElectronBeamOffEnabled = mPowerRequest.electronBeamOffEnabled;
 
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
@@ -754,12 +688,12 @@ final class DisplayPowerController {
                         blockScreenOn();
                     } else {
                         unblockScreenOn();
-                        if (USE_ELECTRON_BEAM_ON_ANIMATION) {
+                        if (mElectronBeamOffEnabled) {
                             if (!mElectronBeamOnAnimator.isStarted()) {
                                 if (mPowerState.getElectronBeamLevel() == 1.0f) {
                                     mPowerState.dismissElectronBeam();
                                 } else if (mPowerState.prepareElectronBeam(
-                                        mElectronBeamFadesConfig ?
+                                        !mElectronBeamOnEnabled ?
                                                 ElectronBeam.MODE_FADE :
                                                         ElectronBeam.MODE_WARM_UP)) {
                                     mElectronBeamOnAnimator.start();
@@ -781,7 +715,7 @@ final class DisplayPowerController {
                         if (mPowerState.getElectronBeamLevel() == 0.0f) {
                             setScreenOn(false);
                         } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamFadesConfig ?
+                                !mElectronBeamOffEnabled ?
                                         ElectronBeam.MODE_FADE :
                                                 ElectronBeam.MODE_COOL_DOWN)
                                 && mPowerState.isScreenOn()) {
@@ -842,7 +776,6 @@ final class DisplayPowerController {
                 mNotifier.onScreenOn();
             } else {
                 mLights.getLight(LightsService.LIGHT_ID_BUTTONS).setBrightness(0);
-                mLights.getLight(LightsService.LIGHT_ID_KEYBOARD).setBrightness(0);
                 mNotifier.onScreenOff();
             }
         }
@@ -996,7 +929,7 @@ final class DisplayPowerController {
             mDebounceLuxTime = time;
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: Initializing: "
-                        + "mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
+                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
                         + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
                         + ", mAmbientLux=" + mAmbientLux);
             }
@@ -1119,10 +1052,6 @@ final class DisplayPowerController {
 
         float value = mScreenAutoBrightnessSpline.interpolate(mAmbientLux);
         float gamma = 1.0f;
-
-        if (DEBUG) {
-            Slog.d(TAG, "updateAutoBrightness: mAmbientLux=" + mAmbientLux + " -> value=" + value);
-        }
 
         if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT
                 && mPowerRequest.screenAutoBrightnessAdjustment != 0.0f) {

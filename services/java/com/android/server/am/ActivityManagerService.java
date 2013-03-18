@@ -3184,7 +3184,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    final void logAppTooSlow(ProcessRecord app, long startTime, String msg) {
+    final void logAppTooSlow(int pid, long startTime, String msg) {
         if (true || IS_USER_BUILD) {
             return;
         }
@@ -3199,6 +3199,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final File tracesFile = new File(tracesPath);
             final File tracesDir = tracesFile.getParentFile();
             final File tracesTmp = new File(tracesDir, "__tmp__");
+            FileOutputStream fos = null;
             try {
                 if (!tracesDir.exists()) {
                     tracesFile.mkdirs();
@@ -3220,21 +3221,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                 TimeUtils.formatDuration(SystemClock.uptimeMillis()-startTime, sb);
                 sb.append(" since ");
                 sb.append(msg);
-                FileOutputStream fos = new FileOutputStream(tracesFile);
+                fos = new FileOutputStream(tracesFile);
                 fos.write(sb.toString().getBytes());
-                if (app == null) {
+                if (pid <= 0) {
                     fos.write("\n*** No application process!".getBytes());
                 }
-                fos.close();
-                FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
             } catch (IOException e) {
                 Slog.w(TAG, "Unable to prepare slow app traces file: " + tracesPath, e);
                 return;
+            } finally {
+                try {
+                    if (fos != null) {
+                        fos.close();
+                    }
+                    FileUtils.setPermissions(tracesFile.getPath(), 0666, -1, -1); // -rw-rw-rw-
+                } catch (IOException ignored) {
+                    // let it go
+                }
             }
 
-            if (app != null) {
+            if (pid > 0) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
-                firstPids.add(app.pid);
+                firstPids.add(pid);
                 dumpStackTraces(tracesPath, firstPids, null, null, null);
             }
 
@@ -6468,7 +6476,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // pending on the process even though we managed to update its
                     // adj level.  Not sure what to do about this, but at least
                     // the race is now smaller.
-                    if (!success) {
+                    if (!success || !Process.isAlive(cpr.proc.pid)) {
                         // Uh oh...  it looks like the provider's process
                         // has been killed on us.  We need to wait for a new
                         // process to be started, and make sure its death
@@ -6477,7 +6485,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 "Existing provider " + cpr.name.flattenToShortString()
                                 + " is crashing; detaching " + r);
                         boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                        appDiedLocked(cpr.proc, cpr.proc.pid, cpr.proc.thread);
+                        if (!success) {
+                            appDiedLocked(cpr.proc, cpr.proc.pid, cpr.proc.thread);
+                        }
                         if (!lastRef) {
                             // This wasn't the last ref our process had on
                             // the provider...  we have now been killed, bail.

@@ -33,7 +33,6 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <linux/ioctl.h>
-#include <cutils/properties.h>
 
 namespace android {
 
@@ -51,6 +50,11 @@ struct FieldIds {
     jfieldID mBatteryVoltage;
     jfieldID mBatteryTemperature;
     jfieldID mBatteryTechnology;
+#ifdef HAS_DOCK_BATTERY
+    jfieldID mDockBatteryStatus;
+    jfieldID mDockBatteryLevel;
+    jfieldID mDockBatteryPresent;
+#endif
 };
 static FieldIds gFieldIds;
 
@@ -67,6 +71,11 @@ struct BatteryManagerConstants {
     jint healthOverVoltage;
     jint healthUnspecifiedFailure;
     jint healthCold;
+#ifdef HAS_DOCK_BATTERY
+    jint dockStatusUnknown;
+    jint dockStatusCharging;
+    jint dockStatusNotCharging;
+#endif
 };
 static BatteryManagerConstants gConstants;
 
@@ -81,6 +90,11 @@ struct PowerSupplyPaths {
     char* batteryVoltagePath;
     char* batteryTemperaturePath;
     char* batteryTechnologyPath;
+#ifdef HAS_DOCK_BATTERY
+    char* dockBatteryStatusPath;
+    char* dockBatteryCapacityPath;
+    char* dockBatteryPresentPath;
+#endif
 };
 static PowerSupplyPaths gPaths;
 
@@ -101,6 +115,21 @@ static jint getBatteryStatus(const char* status)
         }
     }
 }
+
+#ifdef HAS_DOCK_BATTERY
+static jint getDockBatteryStatus(const char* status)
+{
+    switch (status[0]) {
+        case 'C': return gConstants.dockStatusCharging;         // Charging
+        case 'N': return gConstants.dockStatusNotCharging;      // Not charging
+
+        default: {
+            ALOGW("Unknown dock battery status '%s'", status);
+            return gConstants.dockStatusUnknown;
+        }
+    }
+}
+#endif
 
 static jint getBatteryHealth(const char* status)
 {
@@ -183,19 +212,6 @@ static void setIntField(JNIEnv* env, jobject obj, const char* path, jfieldID fie
     env->SetIntField(obj, fieldID, value);
 }
 
-static void setIntFieldMax(JNIEnv* env, jobject obj, const char* path, jfieldID fieldID, int maxValue)
-{
-    const int SIZE = 128;
-    char buf[SIZE];
-
-    jint value = 0;
-    if (readFromFile(path, buf, SIZE) > 0) {
-        value = atoi(buf);
-    }
-    if (value > maxValue) value = maxValue;
-    env->SetIntField(obj, fieldID, value);
-}
-
 static void setVoltageField(JNIEnv* env, jobject obj, const char* path, jfieldID fieldID)
 {
     const int SIZE = 128;
@@ -217,7 +233,7 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
     setBooleanField(env, obj, gPaths.wirelessOnlinePath, gFieldIds.mWirelessOnline);
     setBooleanField(env, obj, gPaths.batteryPresentPath, gFieldIds.mBatteryPresent);
 
-    setIntFieldMax(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel, 100);
+    setIntField(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel);
     setVoltageField(env, obj, gPaths.batteryVoltagePath, gFieldIds.mBatteryVoltage);
     setIntField(env, obj, gPaths.batteryTemperaturePath, gFieldIds.mBatteryTemperature);
 
@@ -235,6 +251,26 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
 
     if (readFromFile(gPaths.batteryTechnologyPath, buf, SIZE) > 0)
         env->SetObjectField(obj, gFieldIds.mBatteryTechnology, env->NewStringUTF(buf));
+
+#ifdef HAS_DOCK_BATTERY
+    jboolean present = false;
+    if (readFromFile(gPaths.dockBatteryPresentPath, buf, SIZE) >= 15) {
+        // should return "dock detect = 1"
+        if (buf[14] == '1') {
+            present = true;
+        }
+    }
+    env->SetBooleanField(obj, gFieldIds.mDockBatteryPresent, present);
+
+    setIntField(env, obj, gPaths.dockBatteryCapacityPath, gFieldIds.mDockBatteryLevel);
+
+    if (readFromFile(gPaths.dockBatteryStatusPath, buf, SIZE) > 0)
+        env->SetIntField(obj, gFieldIds.mDockBatteryStatus,
+                         getDockBatteryStatus(buf));
+    else
+        env->SetIntField(obj, gFieldIds.mDockBatteryStatus,
+                         gConstants.dockStatusUnknown);
+#endif
 }
 
 static JNINativeMethod sMethods[] = {
@@ -292,25 +328,9 @@ int register_android_server_BatteryService(JNIEnv* env)
                     snprintf(path, sizeof(path), "%s/%s/present", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0)
                         gPaths.batteryPresentPath = strdup(path);
-
-                    /* For some weird, unknown reason Motorola phones provide
-                    * capacity information only in 10% steps in the 'capacity'
-                    * file. The 'charge_counter' file provides the 1% steps
-                    * on those phones. Since using charge_counter has issues
-                    * on some devices, we'll use ro.product.use_charge_counter
-                    * in build.prop to decide which capacity file to use.
-                    */
-                    char valueChargeCounter[PROPERTY_VALUE_MAX];
-                    if (property_get("ro.product.use_charge_counter", valueChargeCounter, NULL)
-                        && (!strcmp(valueChargeCounter, "1"))) {
-                       snprintf(path, sizeof(path), "%s/%s/charge_counter", POWER_SUPPLY_PATH, name);
-                       if (access(path, R_OK) == 0)
-                           gPaths.batteryCapacityPath = strdup(path);
-                    } else {
-                        snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
-                        if (access(path, R_OK) == 0)
-                            gPaths.batteryCapacityPath = strdup(path);
-                    }
+                    snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryCapacityPath = strdup(path);
 
                     snprintf(path, sizeof(path), "%s/%s/voltage_now", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0) {
@@ -336,6 +356,19 @@ int register_android_server_BatteryService(JNIEnv* env)
                     if (access(path, R_OK) == 0)
                         gPaths.batteryTechnologyPath = strdup(path);
                 }
+#ifdef HAS_DOCK_BATTERY
+                else if(strcmp(buf, "DockBattery") == 0) {
+                    snprintf(path, sizeof(path), "%s/%s/status", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockBatteryStatusPath = strdup(path);
+                    snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockBatteryCapacityPath = strdup(path);
+                    snprintf(path, sizeof(path), "%s/%s/device/ec_dock", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.dockBatteryPresentPath = strdup(path);
+                }
+#endif
             }
         }
         closedir(dir);
@@ -379,6 +412,12 @@ int register_android_server_BatteryService(JNIEnv* env)
     gFieldIds.mBatteryTechnology = env->GetFieldID(clazz, "mBatteryTechnology", "Ljava/lang/String;");
     gFieldIds.mBatteryVoltage = env->GetFieldID(clazz, "mBatteryVoltage", "I");
     gFieldIds.mBatteryTemperature = env->GetFieldID(clazz, "mBatteryTemperature", "I");
+
+#ifdef HAS_DOCK_BATTERY
+    gFieldIds.mDockBatteryStatus = env->GetFieldID(clazz, "mDockBatteryStatus", "I");
+    gFieldIds.mDockBatteryLevel = env->GetFieldID(clazz, "mDockBatteryLevel", "I");
+    gFieldIds.mDockBatteryPresent = env->GetFieldID(clazz, "mDockBatteryPresent", "Z");
+#endif
 
     LOG_FATAL_IF(gFieldIds.mAcOnline == NULL, "Unable to find BatteryService.AC_ONLINE_PATH");
     LOG_FATAL_IF(gFieldIds.mUsbOnline == NULL, "Unable to find BatteryService.USB_ONLINE_PATH");
@@ -433,6 +472,17 @@ int register_android_server_BatteryService(JNIEnv* env)
     
     gConstants.healthCold = env->GetStaticIntField(clazz,
             env->GetStaticFieldID(clazz, "BATTERY_HEALTH_COLD", "I"));
+
+#ifdef HAS_DOCK_BATTERY
+    gConstants.dockStatusUnknown = env->GetStaticIntField(clazz,
+            env->GetStaticFieldID(clazz, "DOCK_BATTERY_STATUS_UNKNOWN", "I"));
+
+    gConstants.dockStatusCharging = env->GetStaticIntField(clazz,
+            env->GetStaticFieldID(clazz, "DOCK_BATTERY_STATUS_CHARGING", "I"));
+
+    gConstants.dockStatusNotCharging = env->GetStaticIntField(clazz,
+            env->GetStaticFieldID(clazz, "DOCK_BATTERY_STATUS_NOT_CHARGING", "I"));
+#endif
 
     return jniRegisterNativeMethods(env, "com/android/server/BatteryService", sMethods, NELEM(sMethods));
 }

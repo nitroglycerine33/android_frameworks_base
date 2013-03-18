@@ -16,17 +16,39 @@
 
 package com.android.systemui.statusbar.phone;
 
+import java.util.List;
+
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.database.ContentObserver;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Broadcaster;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
 import com.android.systemui.R;
+import com.android.systemui.statusbar.BackgroundAlphaColorDrawable;
+import com.android.systemui.statusbar.NavigationBarView;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -55,6 +77,10 @@ public class PhoneStatusBarView extends PanelBar {
             mSettingsPanelDragzoneFrac = 0f;
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
+        Drawable bg = mContext.getResources().getDrawable(R.drawable.status_bar_background);
+        if(bg instanceof ColorDrawable) {
+            setBackground(new BackgroundAlphaColorDrawable(((ColorDrawable) bg).getColor()));
+        }
     }
 
     public void setBar(PhoneStatusBar bar) {
@@ -160,6 +186,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
+        Slog.v(TAG, "onAllPanelsCollapsed");
         // give animations time to settle
         mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
@@ -169,6 +196,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onPanelFullyOpened(PanelView openPanel) {
         super.onPanelFullyOpened(openPanel);
+        Slog.v(TAG, "onPanelFullyOpened: " + openPanel);
         if (openPanel != mLastFullyOpenedPanel) {
             openPanel.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
@@ -225,7 +253,38 @@ public class PhoneStatusBarView extends PanelBar {
         if (panel.getAlpha() != alpha) {
             panel.setAlpha(alpha);
         }
+        updateBackgroundAlpha();
+        updateShortcutsVisibility();
+    }
 
-        mBar.updateCarrierLabelVisibility(false);
+    private void updateBackgroundAlpha() {
+        if(mFadingPanel != null) {
+            mBar.mTransparencyManager.setTempStatusbarState(true);
+        } else {
+            mBar.mTransparencyManager.setTempStatusbarState(false);
+        }
+        mBar.mTransparencyManager.update();
+    }
+
+    public void updateShortcutsVisibility() {
+        // Notification Shortcuts check for fully expanded panel
+        if (mBar.mSettingsButton == null || mBar.mNotificationButton == null) {
+            // Tablet
+            if (mFullyOpenedPanel != null) {
+                mBar.updateNotificationShortcutsVisibility(true);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+            }
+        } else {
+            // Phone
+            if (mFullyOpenedPanel != null && (mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    !(mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    mBar.mNotificationButton.getVisibility() == View.VISIBLE))) {
+                mBar.updateNotificationShortcutsVisibility(true);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+            }
+        }
+        mBar.updateCarrierAndWifiLabelVisibility(false);
     }
 }

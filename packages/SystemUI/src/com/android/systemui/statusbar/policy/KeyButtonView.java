@@ -18,15 +18,23 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.hardware.input.InputManager;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -35,41 +43,43 @@ import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NavbarEditor;
-import com.android.systemui.statusbar.phone.NavbarEditor.ButtonInfo;
-import com.android.systemui.statusbar.phone.NavigationBarView;
 
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
-    final float BUTTON_QUIESCENT_ALPHA = 0.70f;
+    float BUTTON_QUIESCENT_ALPHA = 0.70f;
 
     long mDownTime;
     int mCode;
     int mTouchSlop;
     Drawable mGlowBG;
+    int mGlowBGColor = Integer.MIN_VALUE;
     int mGlowWidth, mGlowHeight;
+    int mDurationSpeedOn = 500;
+    int mDurationSpeedOff = 50;
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
     boolean mSupportsLongpress = true;
+    protected boolean mHandlingLongpress = false;
     RectF mRect = new RectF(0f,0f,0f,0f);
     AnimatorSet mPressedAnim;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                // Slog.d("KeyButtonView", "longpressed: " + this);
-                if (mCode != 0) {
+                setHandlingLongpress(true);
+                if (!performLongClick() && (mCode != 0)) {
+                    // we tried to do custom long click and failed
+                    // do long click on primary 'key'
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                } else {
-                    // Just an old-fashioned ImageView
-                    performLongClick();
+                    if (mCode == KeyEvent.KEYCODE_DPAD_LEFT || mCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                        removeCallbacks(mCheckLongPress);
+                        postDelayed(mCheckLongPress, ViewConfiguration.getKeyRepeatDelay());
+                    }
                 }
             }
         }
@@ -100,6 +110,45 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
+    }
+
+    public void setSupportsLongPress(boolean supports) {
+        mSupportsLongpress = supports;
+    }
+
+    public void setHandlingLongpress(boolean handling) {
+        mHandlingLongpress = handling;
+    }
+
+    public void setCode(int code) {
+        mCode = code;
+    }
+
+    public int getCode() {
+        return mCode;
+    }
+
+    public void setGlowBackground(int id) {
+        mGlowBG = getResources().getDrawable(id);
+        if (mGlowBG != null) {
+            setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
+            mGlowWidth = mGlowBG.getIntrinsicWidth();
+            mGlowHeight = mGlowBG.getIntrinsicHeight();
+            int defaultColor = mContext.getResources().getColor(
+                    com.android.internal.R.color.white);
+            ContentResolver resolver = mContext.getContentResolver();
+            mGlowBGColor = Settings.System.getInt(resolver,
+                    Settings.System.NAVIGATION_BAR_GLOW_TINT, defaultColor);
+
+            if (mGlowBGColor == Integer.MIN_VALUE) {
+                mGlowBGColor = defaultColor;
+            }
+            mGlowBG.setColorFilter(null);
+            mGlowBG.setColorFilter(mGlowBGColor, PorterDuff.Mode.SRC_ATOP);
+
+        }
     }
 
     @Override
@@ -135,6 +184,7 @@ public class KeyButtonView extends ImageView {
         // the alpha on this ImageView's drawable directly
         setAlpha((int) (x * 255));
         mDrawingAlpha = x;
+        invalidate();
     }
 
     public float getGlowAlpha() {
@@ -194,14 +244,14 @@ public class KeyButtonView extends ImageView {
                         ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
                         ObjectAnimator.ofFloat(this, "glowScale", GLOW_MAX_SCALE_FACTOR)
                     );
-                    as.setDuration(50);
+                    as.setDuration(mDurationSpeedOff);
                 } else {
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
                         ObjectAnimator.ofFloat(this, "glowScale", 1f),
                         ObjectAnimator.ofFloat(this, "drawingAlpha", BUTTON_QUIESCENT_ALPHA)
                     );
-                    as.setDuration(500);
+                    as.setDuration(mDurationSpeedOn);
                 }
                 as.start();
             }
@@ -209,48 +259,14 @@ public class KeyButtonView extends ImageView {
         super.setPressed(pressed);
     }
 
-    public void setInfo (String itemKey, boolean isVertical) {
-        ButtonInfo item = NavbarEditor.buttonMap.get(itemKey);
-        setTag(itemKey);
-        final Resources res = getResources();
-        setContentDescription(res.getString(item.contentDescription));
-        mCode = item.keyCode;
-        boolean isSmallButton = ArrayUtils.contains(NavbarEditor.smallButtonIds, getId());
-        Drawable keyD;
-        if (isSmallButton) {
-            keyD = res.getDrawable(item.sideResource);
-        } else if (!isVertical) {
-            keyD = res.getDrawable(item.portResource);
-        } else {
-            keyD = res.getDrawable(item.landResource);
-        }
-        //Reason for setImageDrawable vs setImageResource is because setImageResource calls relayout() w/o
-        //any checks. setImageDrawable performs size checks and only calls relayout if necessary. We rely on this
-        //because otherwise the setX/setY attributes which are post layout cause it to mess up the layout.
-        setImageDrawable(keyD);
-        if (itemKey.equals(NavbarEditor.NAVBAR_EMPTY)) {
-            if (isSmallButton) {
-                setVisibility(NavigationBarView.getEditMode() ? View.VISIBLE : View.INVISIBLE);
-            } else {
-                setVisibility(NavigationBarView.getEditMode() ? View.VISIBLE : View.GONE);
-            }
-        } else if (itemKey.equals(NavbarEditor.NAVBAR_CONDITIONAL_MENU)) {
-            setVisibility(NavigationBarView.getEditMode() ? View.VISIBLE : View.INVISIBLE);
-        } else if (itemKey.equals(NavbarEditor.NAVBAR_HOME)) {
-            mSupportsLongpress = false;
-        }
-    }
-
     public boolean onTouchEvent(MotionEvent ev) {
-        if (NavigationBarView.getEditMode()) {
-            return false;
-        }
         final int action = ev.getAction();
         int x, y;
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 //Slog.d("KeyButtonView", "press");
+                setHandlingLongpress(false);
                 mDownTime = SystemClock.uptimeMillis();
                 setPressed(true);
                 if (mCode != 0) {
@@ -285,7 +301,7 @@ public class KeyButtonView extends ImageView {
                 final boolean doIt = isPressed();
                 setPressed(false);
                 if (mCode != 0) {
-                    if (doIt) {
+                    if ((doIt) && (!mHandlingLongpress)) {
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                         playSoundEffect(SoundEffectConstants.CLICK);
@@ -294,7 +310,7 @@ public class KeyButtonView extends ImageView {
                     }
                 } else {
                     // no key code, just a regular ImageView
-                    if (doIt) {
+                    if ((doIt) && (!mHandlingLongpress)) {
                         performClick();
                     }
                 }
@@ -319,6 +335,75 @@ public class KeyButtonView extends ImageView {
                 InputDevice.SOURCE_KEYBOARD);
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_BUTTON_ALPHA),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_TINT),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_GLOW_TINT),
+                    false, this);
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_GLOW_DURATION[1]),
+                    false, this);
+            updateSettings();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSettings();
+        }
+    }
+
+    protected void updateSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mDurationSpeedOff = Settings.System.getInt(resolver,
+                Settings.System.NAVIGATION_BAR_GLOW_DURATION[0], 10);
+        mDurationSpeedOn = Settings.System.getInt(resolver,
+                Settings.System.NAVIGATION_BAR_GLOW_DURATION[1], 100);
+        BUTTON_QUIESCENT_ALPHA = Settings.System.getFloat(resolver, Settings.System.NAVIGATION_BAR_BUTTON_ALPHA, 0.7f);
+
+        setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
+
+        if (mGlowBG != null) {
+            int defaultColor = mContext.getResources().getColor(
+                    com.android.internal.R.color.white);
+            mGlowBGColor = Settings.System.getInt(resolver,
+                    Settings.System.NAVIGATION_BAR_GLOW_TINT, defaultColor);
+
+            if (mGlowBGColor == Integer.MIN_VALUE) {
+                mGlowBGColor = defaultColor;
+            }
+            mGlowBG.setColorFilter(null);
+            mGlowBG.setColorFilter(mGlowBGColor, PorterDuff.Mode.SRC_ATOP);
+        }
+
+        int defaultButtonColor = mContext.getResources().getColor(
+                    com.android.internal.R.color.white);
+        int color = Settings.System.getInt(resolver,
+                Settings.System.NAVIGATION_BAR_TINT, defaultButtonColor);
+        if (color == Integer.MIN_VALUE) {
+            setColorFilter(null);
+        } else {
+            setColorFilter(null);
+            setColorFilter(color);
+        }
+                  
+        invalidate();
     }
 }
 

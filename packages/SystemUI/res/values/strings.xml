@@ -460,8 +460,6 @@
 
     <!-- Name of the Jelly Bean platlogo screensaver -->
     <string name="jelly_bean_dream_name">BeanFlinger</string>
-    <string name="bean_dream_settings_cid_title">Use Cid\'s head</string>
-    <string name="bean_dream_settings_cid_summary">Use Cid\'s head instead of jellybeans inside the dream</string>
 
     <!-- Name of the launcher shortcut icon that allows dreams to be started immediately [CHAR LIMIT=20] -->
     <string name="start_dreams">Daydream</string>
@@ -528,52 +526,78 @@
     <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
     <string name="powerwidget_screen_timeout_toast">Screen timeout set to: %1$d %2$s</string>
 
-    <string name="quick_settings_gps">GPS</string>
-    <string name="quick_settings_gps_off">GPS off</string>
-    <string name="quick_settings_screen_sleep">Go to sleep</string>
-    <string name="quick_settings_ringer_on">Sound on</string>
-    <string name="quick_settings_ringer_off">Sound off</string>
-    <string name="quick_settings_vibration_on">Vibration on</string>
-    <string name="quick_settings_vibration_off">Vibration off</string>
-    <string name="quick_settings_label_enabled">On</string>
-    <string name="quick_settings_label_disabled">Off</string>
-    <string name="quick_settings_ringer_normal">Sound</string>
-    <string name="quick_settings_lockscreen">Lock screen</string>
-    <string name="quick_settings_network_type">Network mode</string>
-    <string name="quick_settings_report_bug">Report bug</string>
-    <string name="quick_settings_sync">Sync</string>
-    <string name="quick_settings_sync_off">Sync off</string>
-    <string name="quick_settings_torch">Torch</string>
-    <string name="quick_settings_torch_off">Torch off</string>
-    <string name="quick_settings_nfc">NFC</string>
-    <string name="quick_settings_nfc_off">NFC off</string>
-    <string name="quick_settings_screen_timeout">Timeout</string>
-    <string name="quick_settings_screen_timeout_summary">%1$d %2$s</string>
-    <string name="quick_settings_usb_tether_off_label">Disconnected</string>
-    <string name="quick_settings_usb_tether_connected_label">Tethering off</string>
-    <string name="quick_settings_usb_tether_on_label">Tethering</string>
-    <string name="quick_settings_wifiap">Wi-Fi AP</string>
-    <string name="quick_settings_wifiap_off">Wi-Fi AP off</string>
-    <string name="quick_settings_quiethours">Quiet hours</string>
-    <string name="quick_settings_quiethours_off">Quiet hours off</string>
-    <string name="quick_settings_lte">LTE</string>
-    <string name="quick_settings_lte_off">LTE off</string>
-    <string name="quick_settings_volume">Volume</string>
-
     <!-- Text to display next to the minimal graphical battery meter.  [CHAR LIMIT=3] -->
     <string name="status_bar_settings_battery_meter_min_format" translatable="false">
         <xliff:g id="number">%d</xliff:g>
     </string>
 
-    <!-- Dialog title for navigation bar button selection -->
-    <string name="navbar_dialog_title">Choose action to assign</string>
-    <string name="navbar_home_button">Home button</string>
-    <string name="navbar_recent_button">Recent button</string>
-    <string name="navbar_search_button">Search button</string>
-    <string name="navbar_back_button">Back button</string>
-    <string name="navbar_empty_button">Empty button</string>
-    <string name="navbar_menu_conditional_button">Menu (autoHide) button</string>
-    <string name="navbar_menu_always_button">Menu (alwaysShow) button</string>
-    <string name="navbar_menu_big_button">Menu button</string>
+    <!--  Target/Action Strings -->
+    <string name="shortcut_label">Carbon Actions</string>
+    <string name="action_home">Home</string>
+    <string name="action_back">Back</string>
+    <string name="action_recents">Recents</string>
+    <string name="action_screenshot">Screenshot</string>
+    <string name="action_menu">Menu</string>
+    <string name="action_ime">Open IME Switcher</string>
+    <string name="action_kill">Kill task</string>
+    <string name="action_power">Power</string>
+    <string name="action_search">Search</string>
+    <string name="action_notifications">Notifications</string>
+    <string name="action_lastapp">Last App</string>
+    <string name="action_none">Empty</string>
+
+    <string name="widgets">Widgets</string>
+    <string name="toggle_navbar">NavBar - Toggle</string>
+    <string name="toggle_widgets">Widgets - Toggle</string>
+    <string name="toggle_ring_vib">Ring/Vib - Toggle</string>
+    <string name="toggle_ring_silent">Ring/Silent - Togle</string>
+    <string name="toggle_ring_vib_silent">Ring/Vib/Silent - Toggle</string>
+    <string name="app_killed_message">App Killed</string>
+
+    <!--  Quick Settings -->
+    <string name="quick_settings_vibrate_on_label">Vibrate On</string>
+    <string name="quick_settings_vibrate_off_label">Vibrate Off</string>
+    <string name="quick_settings_silent_on_label">Silent On</string>
+    <string name="quick_settings_silent_off_label">Silent Off</string>
+    <string name="quick_settings_fcharge_on_label">F-Charge On</string>
+    <string name="quick_settings_fcharge_off_label">F-Charge Off</string>
+    <string name="quick_settings_torch_on_label">Torch On</string>
+    <string name="quick_settings_torch_off_label">Torch Off</string>
+    <string name="quick_settings_nfc_on_label">NFC On</string>
+    <string name="quick_settings_nfc_off_label">NFC Off</string>
+    <string name="quick_settings_wifi_tether_on_label">Wifi Tether On</string>
+    <string name="quick_settings_wifi_tether_off_label">Wifi Tether Off</string>
+    <string name="quick_settings_bt_tether_on_label">BT Tether On</string>
+    <string name="quick_settings_bt_tether_off_label">BT Tether Off</string>
+    <string name="quick_settings_usb_tether_on_label">USB Tether On</string>
+    <string name="quick_settings_usb_tether_off_label">USB Tether Off</string>
+    <string name="quick_settings_sync_on_label">Sync On</string>
+    <string name="quick_settings_sync_off_label">Sync Off</string>
+    <string name="quick_settings_twog_on_label">2g On</string>
+    <string name="quick_settings_twog_off_label">2g Off</string>
+    <string name="quick_settings_lte_on_label">LTE On</string>
+    <string name="quick_settings_lte_off_label">LTE Off</string>
+    <string name="quick_settings_gps_on_label">GPS On</string>
+    <string name="quick_settings_gps_off_label">GPS Off</string>
+    <string name="quick_settings_data_on_label">Data On</string>
+    <string name="quick_settings_data_off_label">Data Off</string>
+    <string name="quick_settings_navbar_hide_on_label">NavBar Hide On</string>
+    <string name="quick_settings_navbar_hide_off_label">NavBAr Hide Off</string>
+    <string name="quick_settings_sound_on">Sound on</string>
+
+    <!-- Recents Ram Bar -->
+    <string name="memory">RAM</string>
+    <!-- [CHAR LIMIT=10] Running services, summary of background processes -->
+    <string name="service_free_mem"><xliff:g id="memory">%1$s</xliff:g> free</string>
+    <!-- [CHAR LIMIT=10] Running services, summary of foreground processes -->
+    <string name="service_used_mem"><xliff:g id="memory">%1$s</xliff:g> used</string>
+
+    <!-- Label in drop down to identify brightness slider -->
+    <string name="brightness_label">Brightness</string>
+
+    <string name="pie_date_format">ccc, dd MMM yyyy</string>
+    <string name="pie_hour_format_12">hh:mm</string>
+    <string name="pie_hour_format_24">HH:mm</string>
+    <string name="pie_am_pm">a</string>
 
 </resources>

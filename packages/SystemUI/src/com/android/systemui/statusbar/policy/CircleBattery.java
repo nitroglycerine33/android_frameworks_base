@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
@@ -44,7 +45,7 @@ import com.android.internal.R;
 /***
  * Note about CircleBattery Implementation:
  *
- * Unfortunately, we cannot use BatteryController here,
+ * Unfortunately, we cannot use BatteryController or DockBatteryController here,
  * since communication between controller and this view is not possible without
  * huge changes. As a result, this Class is doing everything by itself,
  * monitoring battery level and battery settings.
@@ -59,24 +60,34 @@ public class CircleBattery extends ImageView {
     private boolean mAttached;      // whether or not attached to a window
     private boolean mActivated;     // whether or not activated due to system settings
     private boolean mPercentage;    // whether or not to show percentage number
-    private boolean mBatteryPlugged;// whether or not battery is currently plugged
-    private int     mBatteryStatus; // current battery status
+    private boolean mIsCharging;    // whether or not device is currently charging
     private int     mLevel;         // current battery level
     private int     mAnimOffset;    // current level of charging animation
     private boolean mIsAnimating;   // stores charge-animation status to reliably remove callbacks
+    private int     mDockLevel;     // current dock battery level
+    private boolean mDockIsCharging;// whether or not dock battery is currently charging
+    private boolean mIsDocked = false;      // whether or not dock battery is connected
 
     private int     mCircleSize;    // draw size of circle. read rather complicated from
                                     // another status bar icon, so it fits the icon size
                                     // no matter the dps and resolution
     private RectF   mRectLeft;      // contains the precalculated rect used in drawArc(), derived from mCircleSize
+    private RectF   mRectRight;     // contains the precalculated rect used in drawArc() for dock battery
     private Float   mTextLeftX;     // precalculated x position for drawText() to appear centered
     private Float   mTextY;         // precalculated y position for drawText() to appear vertical-centered
+    private Float   mTextRightX;    // precalculated x position for dock battery drawText()
 
     // quiet a lot of paint variables. helps to move cpu-usage from actual drawing to initialization
     private Paint   mPaintFont;
     private Paint   mPaintGray;
     private Paint   mPaintSystem;
     private Paint   mPaintRed;
+    private int batteryStyle;
+
+    private int mCircleColor;
+    private int mCircleTextColor;
+    private int mCircleAnimSpeed;
+    private int mCircleReset;
 
     // runnable to invalidate view via mHandler.postDelayed() call
     private final Runnable mInvalidate = new Runnable() {
@@ -96,19 +107,52 @@ public class CircleBattery extends ImageView {
         public void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BATTERY), false, this);
+                    Settings.System.STATUSBAR_BATTERY_ICON), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_TEXT_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_ANIMATIONSPEED), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_RESET), false, this);
             onChange(true);
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            int batteryStyle = (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.STATUS_BAR_BATTERY, 0));
+            Resources res = getResources();
 
-            mActivated = (batteryStyle == BatteryController.BATTERY_STYLE_CIRCLE || batteryStyle == BatteryController.BATTERY_STYLE_CIRCLE_PERCENT);
-            mPercentage = (batteryStyle == BatteryController.BATTERY_STYLE_CIRCLE_PERCENT);
+            batteryStyle = (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_BATTERY_ICON, 0));
 
-            setVisibility(mActivated && isBatteryPresent() ? View.VISIBLE : View.GONE);
+            mCircleColor = (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_COLOR, res.getColor(R.color.holo_blue_dark)));
+            mCircleTextColor = (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_TEXT_COLOR, res.getColor(R.color.holo_blue_dark)));
+            mCircleAnimSpeed = (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_ANIMATIONSPEED, 3));
+
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_CIRCLE_BATTERY_RESET, 0) == 1) {
+                mCircleColor = res.getColor(R.color.holo_blue_dark);
+                mCircleTextColor = res.getColor(R.color.holo_blue_dark);
+            }
+
+            /*
+             * initialize vars and force redraw
+             */
+            initializeCircleVars();
+            mRectLeft = null;
+            mCircleSize = 0;
+
+            mActivated = (batteryStyle == SbBatteryController.STYLE_ICON_CIRCLE ||
+                          batteryStyle == SbBatteryController.STYLE_ICON_CIRCLE_PERCENT ||
+                          batteryStyle == SbBatteryController.STYLE_ICON_DOTTED_CIRCLE_PERCENT);
+            mPercentage = (batteryStyle == SbBatteryController.STYLE_ICON_CIRCLE_PERCENT ||
+                           batteryStyle == SbBatteryController.STYLE_ICON_DOTTED_CIRCLE_PERCENT);
+
+            setVisibility(mActivated ? View.VISIBLE : View.GONE);
             if (mBatteryReceiver != null) {
                 mBatteryReceiver.updateRegistration();
             }
@@ -130,16 +174,13 @@ public class CircleBattery extends ImageView {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                onBatteryStatusChange(intent);
-
-                int visibility = mActivated && isBatteryPresent() ? View.VISIBLE : View.GONE;
-                if (getVisibility() != visibility) {
-                    setVisibility(visibility);
-                }
+                mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                mIsCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
 
                 if (mActivated && mAttached) {
                     LayoutParams l = getLayoutParams();
-                    l.width = mCircleSize + getPaddingLeft();
+                    l.width = mCircleSize + getPaddingLeft()
+                            + (mIsDocked ? mCircleSize + getPaddingLeft() : 0);
                     setLayoutParams(l);
 
                     invalidate();
@@ -190,69 +231,13 @@ public class CircleBattery extends ImageView {
         mContext = context;
         mHandler = new Handler();
 
+        batteryStyle = (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_BATTERY_ICON, 0));
         SettingsObserver settingsObserver = new SettingsObserver(mHandler);
         settingsObserver.observe();
         mBatteryReceiver = new BatteryReceiver(mContext);
 
-        // initialize and setup all paint variables
-        // stroke width is later set in initSizeBasedStuff()
-        Resources res = getResources();
-
-        mPaintFont = new Paint();
-        mPaintFont.setAntiAlias(true);
-        mPaintFont.setDither(true);
-        mPaintFont.setStyle(Paint.Style.STROKE);
-
-        mPaintGray = new Paint(mPaintFont);
-        mPaintSystem = new Paint(mPaintFont);
-        mPaintRed = new Paint(mPaintFont);
-
-        mPaintGray.setStrokeCap(Paint.Cap.BUTT);
-        mPaintSystem.setStrokeCap(Paint.Cap.BUTT);
-        mPaintRed.setStrokeCap(Paint.Cap.BUTT);
-
-        mPaintFont.setColor(res.getColor(R.color.holo_blue_dark));
-        mPaintSystem.setColor(res.getColor(R.color.holo_blue_dark));
-        // could not find the darker definition anywhere in resources
-        // do not want to use static 0x404040 color value. would break theming.
-        mPaintGray.setColor(res.getColor(R.color.darker_gray));
-        mPaintRed.setColor(res.getColor(R.color.holo_red_light));
-
-        // font needs some extra settings
-        mPaintFont.setTextAlign(Align.CENTER);
-        mPaintFont.setFakeBoldText(true);
-    }
-
-    protected int getLevel() {
-        return mLevel;
-    }
-
-    protected int getBatteryStatus() {
-        return mBatteryStatus;
-    }
-
-    protected boolean isBatteryPlugged() {
-        return mBatteryPlugged;
-    }
-
-    protected boolean isBatteryPresent() {
-        // the battery widget always is shown.
-        return true;
-    }
-
-    private boolean isBatteryStatusUnknown() {
-        return getBatteryStatus() == BatteryManager.BATTERY_STATUS_UNKNOWN;
-    }
-
-    private boolean isBatteryStatusCharging() {
-        return getBatteryStatus() == BatteryManager.BATTERY_STATUS_CHARGING;
-    }
-
-    protected void onBatteryStatusChange(Intent intent) {
-        mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-        mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-        mBatteryStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
-                                            BatteryManager.BATTERY_STATUS_UNKNOWN);
+        initializeCircleVars();
     }
 
     @Override
@@ -284,25 +269,29 @@ public class CircleBattery extends ImageView {
             initSizeMeasureIconHeight();
         }
 
-        setMeasuredDimension(mCircleSize + getPaddingLeft(), mCircleSize);
+        setMeasuredDimension(mCircleSize + getPaddingLeft()
+                + (mIsDocked ? mCircleSize + getPaddingLeft() : 0), mCircleSize);
     }
 
-    protected void drawCircle(Canvas canvas, int level, int animOffset, float textX, RectF drawRect) {
+    private void drawCircle(Canvas canvas, int level, int animOffset, float textX, RectF drawRect) {
         Paint usePaint = mPaintSystem;
-        int internalLevel = level;
-        boolean unknownStatus = isBatteryStatusUnknown();
+
         // turn red at 14% - same level android battery warning appears
-        if (unknownStatus) {
-            usePaint = mPaintGray;
-            internalLevel = 100; // Draw all the circle;
-        } else if (internalLevel <= 14) {
+        if (level <= 14) {
             usePaint = mPaintRed;
+        }
+        usePaint.setAntiAlias(true);
+        if (batteryStyle == SbBatteryController.STYLE_ICON_DOTTED_CIRCLE_PERCENT) {
+            // change usePaint from solid to dashed
+            usePaint.setPathEffect(new DashPathEffect(new float[]{3,2},0));
+        }else {
+            usePaint.setPathEffect(null);
         }
 
         // pad circle percentage to 100% once it reaches 97%
         // for one, the circle looks odd with a too small gap,
         // for another, some phones never reach 100% due to hardware design
-        int padLevel = internalLevel;
+        int padLevel = level;
         if (padLevel >= 97) {
             padLevel = 100;
         }
@@ -313,12 +302,13 @@ public class CircleBattery extends ImageView {
         canvas.drawArc(drawRect, 270 + animOffset, 3.6f * padLevel, false, usePaint);
         // if chosen by options, draw percentage text in the middle
         // always skip percentage when 100, so layout doesnt break
-        if (unknownStatus) {
-            mPaintFont.setColor(usePaint.getColor());
-            canvas.drawText("?", textX, mTextY, mPaintFont);
-        } else if (internalLevel < 100 && mPercentage) {
-            mPaintFont.setColor(usePaint.getColor());
-            canvas.drawText(Integer.toString(internalLevel), textX, mTextY, mPaintFont);
+        if (level < 100 && mPercentage) {
+            if (level <= 14) {
+                mPaintFont.setColor(mPaintRed.getColor());
+            }else {
+                mPaintFont.setColor(mCircleTextColor);
+            }
+            canvas.drawText(Integer.toString(level), textX, mTextY, mPaintFont);
         }
 
     }
@@ -331,10 +321,43 @@ public class CircleBattery extends ImageView {
 
         updateChargeAnim();
 
-        drawCircle(canvas,
-                   getLevel(),
-                   (isBatteryStatusCharging() ? mAnimOffset : 0), mTextLeftX, mRectLeft);
+        if (mIsDocked) {
+            drawCircle(canvas, mDockLevel, (mDockIsCharging ? mAnimOffset : 0), mTextLeftX, mRectLeft);
+            drawCircle(canvas, mLevel, (mIsCharging ? mAnimOffset : 0), mTextRightX, mRectRight);
+        } else {
+            drawCircle(canvas, mLevel, (mIsCharging ? mAnimOffset : 0), mTextLeftX, mRectLeft);
+        }
     }
+
+    /***
+     * Initialize the Circle vars for start and observer
+     */
+    private void initializeCircleVars() {
+        // initialize and setup all paint variables
+        // stroke width is later set in initSizeBasedStuff()
+
+        Resources res = getResources();
+
+        mPaintFont = new Paint();
+        mPaintFont.setAntiAlias(true);
+        mPaintFont.setDither(true);
+        mPaintFont.setStyle(Paint.Style.STROKE);
+
+        mPaintGray = new Paint(mPaintFont);
+        mPaintSystem = new Paint(mPaintFont);
+        mPaintRed = new Paint(mPaintFont);
+
+        mPaintSystem.setColor(mCircleColor);
+        // could not find the darker definition anywhere in resources
+        // do not want to use static 0x404040 color value. would break theming.
+        mPaintGray.setColor(res.getColor(R.color.darker_gray));
+        mPaintRed.setColor(res.getColor(R.color.holo_red_light));
+
+        // font needs some extra settings
+        mPaintFont.setTextAlign(Align.CENTER);
+        mPaintFont.setFakeBoldText(true);
+    }
+
 
     /***
      * updates the animation counter
@@ -342,7 +365,7 @@ public class CircleBattery extends ImageView {
      * uses mInvalidate for delayed invalidate() callbacks
      */
     private void updateChargeAnim() {
-        if (!isBatteryStatusCharging() || getLevel() >= 97) {
+        if (!(mIsCharging || mDockIsCharging) || (mLevel >= 97 && mDockLevel >= 97)) {
             if (mIsAnimating) {
                 mIsAnimating = false;
                 mAnimOffset = 0;
@@ -356,7 +379,7 @@ public class CircleBattery extends ImageView {
         if (mAnimOffset > 360) {
             mAnimOffset = 0;
         } else {
-            mAnimOffset += 3;
+            mAnimOffset += mCircleAnimSpeed;
         }
 
         mHandler.removeCallbacks(mInvalidate);
@@ -375,20 +398,23 @@ public class CircleBattery extends ImageView {
 
         mPaintFont.setTextSize(mCircleSize / 2f);
 
-        float strokeWidth = mCircleSize / 6.5f;
+        float strokeWidth = mCircleSize / 7f;
         mPaintRed.setStrokeWidth(strokeWidth);
         mPaintSystem.setStrokeWidth(strokeWidth);
         mPaintGray.setStrokeWidth(strokeWidth / 3.5f);
-
         // calculate rectangle for drawArc calls
         int pLeft = getPaddingLeft();
         mRectLeft = new RectF(pLeft + strokeWidth / 2.0f, 0 + strokeWidth / 2.0f, mCircleSize
                 - strokeWidth / 2.0f + pLeft, mCircleSize - strokeWidth / 2.0f);
+        int off = pLeft + mCircleSize;
+        mRectRight = new RectF(mRectLeft.left + off, mRectLeft.top, mRectLeft.right + off,
+                mRectLeft.bottom);
 
         // calculate Y position for text
         Rect bounds = new Rect();
         mPaintFont.getTextBounds("99", 0, "99".length(), bounds);
         mTextLeftX = mCircleSize / 2.0f + getPaddingLeft();
+        mTextRightX = mTextLeftX + off;
         // the +1 at end of formular balances out rounding issues. works out on all resolutions
         mTextY = mCircleSize / 2.0f + (bounds.bottom - bounds.top) / 2.0f - strokeWidth / 2.0f + 1;
 
@@ -408,12 +434,13 @@ public class CircleBattery extends ImageView {
                 com.android.systemui.R.drawable.stat_sys_wifi_signal_4_fully);
         final int x = measure.getWidth() / 2;
 
-        mCircleSize = 0;
+        mCircleSize = measure.getHeight();
+        /*mCircleSize = 0;
         for (int y = 0; y < measure.getHeight(); y++) {
             int alpha = Color.alpha(measure.getPixel(x, y));
             if (alpha > 5) {
                 mCircleSize++;
             }
-        }
+        }*/
     }
 }

@@ -978,8 +978,6 @@
   <java-symbol type="drawable" name="picture_emergency" />
   <java-symbol type="drawable" name="platlogo" />
   <java-symbol type="drawable" name="platlogo_alt" />
-  <java-symbol type="drawable" name="cidlogo" />
-  <java-symbol type="drawable" name="cidlogo_alt" />
   <java-symbol type="drawable" name="stat_notify_sync_error" />
   <java-symbol type="drawable" name="stat_notify_wifi_in_range" />
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
@@ -1181,6 +1179,8 @@
   <java-symbol type="dimen" name="config_minScalingSpan" />
   <java-symbol type="dimen" name="config_minScalingTouchMajor" />
 
+  <java-symbol type="string" name="config_fastChargePath" />
+
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
@@ -1342,6 +1342,7 @@
   <java-symbol type="id" name="keyguard_widget_pager_delete_target" />
   <java-symbol type="id" name="keyguard_bouncer_frame" />
   <java-symbol type="id" name="app_widget_container" />
+  <java-symbol type="id" name="app_widget_container_carousel" />
   <java-symbol type="id" name="view_flipper" />
   <java-symbol type="id" name="emergency_call_button" />
   <java-symbol type="id" name="keyguard_host_view" />
@@ -1349,6 +1350,8 @@
   <java-symbol type="id" name="lockPatternView" />
   <java-symbol type="id" name="forgot_password_button" />
   <java-symbol type="id" name="glow_pad_view" />
+  <java-symbol type="id" name="keyguard_glow_pad_container" />
+  <java-symbol type="id" name="keyguard_message_and_shortcuts" />
   <java-symbol type="id" name="delete_button" />
   <java-symbol type="id" name="keyguard_user_avatar" />
   <java-symbol type="id" name="keyguard_user_name" />
@@ -1367,6 +1370,7 @@
   <java-symbol type="id" name="keyguard_user_selector" />
   <java-symbol type="id" name="key_enter" />
   <java-symbol type="id" name="keyguard_selector_view_frame" />
+  <java-symbol type="id" name="shortcuts" />
   <java-symbol type="integer" name="config_carDockRotation" />
   <java-symbol type="integer" name="config_defaultUiModeType" />
   <java-symbol type="integer" name="config_deskDockRotation" />
@@ -1390,6 +1394,7 @@
   <java-symbol type="layout" name="keyguard_screen_unlock_landscape" />
   <java-symbol type="layout" name="keyguard_screen_unlock_portrait" />
   <java-symbol type="layout" name="keyguard_selector_view" />
+  <java-symbol type="layout" name="keyguard_shortcuts" />
   <java-symbol type="layout" name="keyguard_pattern_view" />
   <java-symbol type="layout" name="keyguard_password_view" />
   <java-symbol type="layout" name="keyguard_pin_view" />
@@ -1699,6 +1704,9 @@
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
+  <!-- AOKP symbols for service -->
+  <java-symbol type="string" name="notify_turn_wifi_off_title" />
+  <java-symbol type="drawable" name="ic_stat_turn_wifi_off" />
 
   <java-symbol type="layout" name="resolver_grid" />
   <java-symbol type="id" name="resolver_grid" />
@@ -1838,12 +1846,14 @@
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
   <java-symbol type="bool" name="config_hasRotationLockSwitch" />
   <java-symbol type="integer" name="config_backKillTimeout" />
-  <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
   <java-symbol type="string" name="config_legacyUmsLunFile" />
   <java-symbol type="bool" name="config_hasRemovableLid" />
   <java-symbol type="bool" name="config_hasDockBattery" />
   <java-symbol type="bool" name="config_noDelayInATwoDP" />
+  <java-symbol type="string" name="config_deviceKeyHandlerLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+  <java-symbol type="string" name="config_legacyUmsLunFile" />
 
   <!-- Telephony -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
@@ -1890,6 +1900,9 @@
   <!-- Developer settings - Kill app back press -->
   <java-symbol type="string" name="app_killed_message" />
 
+  <!-- Expanded desktop default set -->
+  <java-symbol type="string" name="expanded_mode_default_set" />
+
   <!-- Lockscreen -->
   <java-symbol type="bool" name="config_disableHomeUnlockSetting" />
   <java-symbol type="id" name="expand_challenge_handle" />
@@ -1904,26 +1917,11 @@
   <java-symbol type="bool" name="config_wifiApStartInterface" />
   <java-symbol type="bool" name="config_wifiApFirmwareReload" />
 
-  <!-- Device specific handlers -->
-  <java-symbol type="string" name="config_deviceHandlersLib" />
-  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
-  <java-symbol type="string" name="config_deviceDockBatteryHandlerClass" />
-
-  <!-- Reboot confirmation string -->
-  <java-symbol type="string" name="reboot_confirm" />
-
-  <!-- Navigation Ring -->
-  <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
-  <java-symbol type="drawable" name="ic_navigation_ring_blank_activated" />
-  <java-symbol type="drawable" name="ic_navigation_ring_empty" />
-  <java-symbol type="drawable" name="ic_navigation_ring_ime_switcher" />
-  <java-symbol type="drawable" name="ic_navigation_ring_killtask" />
-  <java-symbol type="drawable" name="ic_navigation_ring_power" />
-  <java-symbol type="drawable" name="ic_navigation_ring_screenshot" />
-  <java-symbol type="drawable" name="ic_navigation_ring_silent" />
-  <java-symbol type="drawable" name="ic_navigation_ring_sound_on" />
-  <java-symbol type="drawable" name="ic_navigation_ring_torch_on" />
-  <java-symbol type="drawable" name="ic_navigation_ring_torch_off" />
-  <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
+  <!-- Hide Navbar -->
+  <java-symbol type="layout" name="global_actions_navbar_mode" />
+  <java-symbol type="id" name="navbartoggle" />
+  <java-symbol type="id" name="navbarhome" />
+  <java-symbol type="id" name="navbarback" />
+  <java-symbol type="id" name="navbarmenu" />
 
 </resources>

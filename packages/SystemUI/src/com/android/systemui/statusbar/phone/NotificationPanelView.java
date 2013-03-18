@@ -38,7 +38,7 @@ public class NotificationPanelView extends PanelView {
     private static final float STATUS_BAR_SWIPE_MOVE_PERCENTAGE = 0.2f;
 
     private Drawable mHandleBar;
-    private int mHandleBarHeight;
+    private float mHandleBarHeight;
     private View mHandleView;
     private int mFingers;
     private PhoneStatusBar mStatusBar;
@@ -110,6 +110,10 @@ public class NotificationPanelView extends PanelView {
             boolean flip = false;
             boolean swipeFlipJustFinished = false;
             boolean swipeFlipJustStarted = false;
+            boolean noNotificationPulldown = Settings.System.getInt(getContext().getContentResolver(),
+                                    Settings.System.QS_NO_NOTIFICATION_PULLDOWN, 0) == 1;
+            int quickPulldownMode = Settings.System.getInt(getContext().getContentResolver(),
+                                    Settings.System.QS_QUICK_PULLDOWN, 0);
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     mGestureStartX = event.getX(0);
@@ -119,12 +123,12 @@ public class NotificationPanelView extends PanelView {
                         mGestureStartY > getHeight() - mHandleBarHeight - getPaddingBottom();
                     mOkToFlip = getExpandedHeight() == 0;
                     if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_SETTINGS_RIGHT_PERCENTAGE) &&
-                            Settings.System.getInt(getContext().getContentResolver(),
-                                    Settings.System.QS_QUICK_PULLDOWN, 0) == 1) {
+                            quickPulldownMode == 1) {
                         flip = true;
                     } else if (event.getX(0) < getWidth() * (1.0f - STATUS_BAR_SETTINGS_LEFT_PERCENTAGE) &&
-                            Settings.System.getInt(getContext().getContentResolver(),
-                                    Settings.System.QS_QUICK_PULLDOWN, 0) == 2) {
+                            quickPulldownMode == 2) {
+                        flip = true;
+                    } else if (!mStatusBar.hasClearableNotifications() && noNotificationPulldown) {
                         flip = true;
                     }
                     break;
@@ -179,17 +183,17 @@ public class NotificationPanelView extends PanelView {
                 }
                 if (maxy - miny < mHandleBarHeight) {
                     if (getMeasuredHeight() < mHandleBarHeight) {
+                    mStatusBar.switchToSettings();
+                } else {
+                    // Do not flip if the drag event started within the top bar
+                    if (MotionEvent.ACTION_DOWN == event.getActionMasked() && event.getY(0) < mHandleBarHeight ) {
                         mStatusBar.switchToSettings();
                     } else {
-                        // Do not flip if the drag event started within the top bar
-                        if (MotionEvent.ACTION_DOWN == event.getActionMasked() && event.getY(0) < mHandleBarHeight ) {
-                            mStatusBar.switchToSettings();
-                        } else {
-                            mStatusBar.flipToSettings();
-                        }
+                        mStatusBar.flipToSettings();
                     }
-                    mOkToFlip = false;
                 }
+                mOkToFlip = false;
+            }
             } else if (mSwipeTriggered) {
                 final float deltaX = (event.getX(0) - mGestureStartX) * mSwipeDirection;
                 mStatusBar.partialFlip(mFlipOffset +
