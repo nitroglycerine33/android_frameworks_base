@@ -359,8 +359,15 @@
              1  UI_MODE_TYPE_NORMAL
              4  UI_MODE_TYPE_TELEVISION
              5  UI_MODE_TYPE_APPLIANCE
+             6  UI_MODE_TYPE_INVERTED
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
+
+    <!-- Control the alternative UI mode type to use when UI mode is toggled
+         from framework.  One of the following values (See Configuration.java):
+             1  UI_MODE_TYPE_NORMAL
+             6  UI_MODE_TYPE_INVERTED -->
+    <integer name="config_alternativeUiModeType">6</integer>
 
     <!-- Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
@@ -934,7 +941,7 @@
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.SCREENSAVER_COMPONENT) -->
-    <string name="config_dreamsDefaultComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
+    <string name="config_dreamsDefaultComponent">com.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->
