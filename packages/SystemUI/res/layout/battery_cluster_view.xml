@@ -75,7 +75,6 @@
             android:textAppearance="@style/TextAppearance.StatusBar.BatteryTextOnly"
             android:singleLine="true"
             android:gravity="bottom"
-            android:paddingLeft="4dip"
         />
     </FrameLayout>
 </com.android.systemui.statusbar.policy.SbBatteryController>
