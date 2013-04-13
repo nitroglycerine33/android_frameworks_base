@@ -215,6 +215,18 @@ public final class Settings {
     public static final String ACTION_BLUETOOTH_SETTINGS =
             "android.settings.BLUETOOTH_SETTINGS";
 
+    public static final String EXTRA_ACCESS_REQUEST_TYPE =
+        "android.bluetooth.device.extra.ACCESS_REQUEST_TYPE";
+
+    /**@hide*/
+    public static final int REQUEST_TYPE_PROFILE_CONNECTION = 1;
+
+    /**@hide*/
+    public static final int REQUEST_TYPE_PHONEBOOK_ACCESS = 2;
+
+    /**@hide*/
+    public static final int REQUEST_TYPE_MESSAGE_ACCESS = 3;
+
     /**
      * Activity Action: Show settings to allow configuration of Wifi Displays.
      * <p>
