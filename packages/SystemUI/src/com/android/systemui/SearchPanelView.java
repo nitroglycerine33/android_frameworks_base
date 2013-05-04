@@ -103,7 +103,7 @@ public class SearchPanelView extends FrameLayout implements
     private final Context mContext;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
-
+    private SettingsObserver mObserver;
     private boolean mShowing;
     private View mSearchTargetsContainer;
     private GlowPadView mGlowPadView;
@@ -147,10 +147,20 @@ public class SearchPanelView extends FrameLayout implements
 
         mCarbonTarget = new CarbonTarget(context);
 
-        SettingsObserver observer = new SettingsObserver(new Handler());
-        observer.observe();
-        updateSettings();
+        mObserver = new SettingsObserver(new Handler());
+    }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mObserver.observe();
+        updateSettings();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mObserver.observe();
+        super.onDetachedFromWindow();
     }
 
     private class H extends Handler {
@@ -573,7 +583,10 @@ public class SearchPanelView extends FrameLayout implements
 	            resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.SYSTEMUI_NAVRING_LONG[i]), false, this);
             }
+        }
 
+        void unobserve() {
+            mContext.getContentResolver().unregisterContentObserver(this);
         }
 
         @Override
