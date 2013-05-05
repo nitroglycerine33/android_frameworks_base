@@ -1925,4 +1925,7 @@
   <java-symbol type="id" name="navbarback" />
   <java-symbol type="id" name="navbarmenu" />
 
+  <!-- Panel auto brightness -->
+  <java-symbol type="integer" name="config_panelAutoBrightnessValue" />
+
 </resources>
