@@ -43,6 +43,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ThemeUtils;
 
+import com.android.internal.os.IDeviceHandler;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.view.IInputContext;
@@ -330,7 +331,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mLimitedAlphaCompositing;
 
-    final WindowManagerPolicy mPolicy = PolicyManager.makeNewWindowManager();
+    final WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
 
@@ -485,6 +486,12 @@ public class WindowManagerService extends IWindowManager.Stub
     int mLayoutSeq = 0;
 
     int mLastStatusBarVisibility = 0;
+
+    /**
+     * Mask used to control the visibility of the status and navigation bar for short periods
+     * of time. (e.g. during pie controls)
+     */
+    int mStatusBarVisibilityMask = 0;
 
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
@@ -769,7 +776,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
-            final InputManagerService im,
+            final InputManagerService im, final IDeviceHandler device,
             final Handler uiHandler, final Handler wmHandler,
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
@@ -778,7 +785,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 holder[0] = new WindowManagerService(context, pm, dm, im,
-                        uiHandler, haveInputMethods, showBootMsgs, onlyCore);
+                        device, uiHandler, haveInputMethods, showBootMsgs, onlyCore);
             }
         }, 0);
         return holder[0];
@@ -800,7 +807,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, PowerManagerService pm,
             DisplayManagerService displayManager, InputManagerService inputManager,
-            Handler uiHandler,
+            IDeviceHandler device, Handler uiHandler,
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -810,6 +817,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mDisplayManagerService = displayManager;
         mHeadless = displayManager.isHeadless();
+        mPolicy = PolicyManager.makeNewWindowManager(device);
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, null);
@@ -1618,8 +1626,9 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean targetChanged = false;
 
         // TODO(multidisplay): Wallpapers on main screen only.
-        final int dw = mPolicy.getWallpaperWidth(mRotation);
-        final int dh = mPolicy.getWallpaperHeight(mRotation);
+        final DisplayInfo displayInfo = getDefaultDisplayContentLocked().getDisplayInfo();
+        final int dw = displayInfo.appWidth;
+        final int dh = displayInfo.appHeight;
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
@@ -1876,6 +1885,7 @@ public class WindowManagerService extends IWindowManager.Stub
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
+
                 if (visible) {
                     updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
@@ -2039,8 +2049,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final int dw = mPolicy.getWallpaperWidth(mRotation);
-        final int dh = mPolicy.getWallpaperHeight(mRotation);
+        final DisplayContent displayContent = changingTarget.mDisplayContent;
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        final int dw = displayInfo.appWidth;
+        final int dh = displayInfo.appHeight;
 
         WindowState target = mWallpaperTarget;
         if (target != null) {
@@ -4173,7 +4185,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mStartingIconInTransition = false;
                 mSkipAppTransitionAnimation = false;
                 mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, 5000);
+                mH.sendMessageDelayed(mH.obtainMessage(H.APP_TRANSITION_TIMEOUT),
+                        5000);
             }
         }
     }
@@ -4744,7 +4757,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppsFreezingScreen == 1) {
                     startFreezingDisplayLocked(false, 0, 0);
                     mH.removeMessages(H.APP_FREEZE_TIMEOUT);
-                    mH.sendEmptyMessageDelayed(H.APP_FREEZE_TIMEOUT, 5000);
+                    mH.sendMessageDelayed(mH.obtainMessage(H.APP_FREEZE_TIMEOUT),
+                            5000);
                 }
             }
             final int N = wtoken.allAppWindows.size();
@@ -5264,7 +5278,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     startFreezingDisplayLocked(false, exitAnim, enterAnim);
                     mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
-                    mH.sendEmptyMessageDelayed(H.CLIENT_FREEZE_TIMEOUT, 5000);
+                    mH.sendMessageDelayed(mH.obtainMessage(H.CLIENT_FREEZE_TIMEOUT),
+                            5000);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -5392,7 +5407,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Persist setting
-        mH.sendEmptyMessage(H.PERSIST_ANIMATION_SCALE);
+        mH.obtainMessage(H.PERSIST_ANIMATION_SCALE).sendToTarget();
     }
 
     public void setAnimationScales(float[] scales) {
@@ -5414,7 +5429,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Persist setting
-        mH.sendEmptyMessage(H.PERSIST_ANIMATION_SCALE);
+        mH.obtainMessage(H.PERSIST_ANIMATION_SCALE).sendToTarget();
     }
 
     private void setAnimatorDurationScale(float scale) {
@@ -5530,7 +5545,8 @@ public class WindowManagerService extends IWindowManager.Stub
             hideBootMessagesLocked();
             // If the screen still doesn't come up after 30 seconds, give
             // up and turn it on.
-            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30*1000);
+            Message msg = mH.obtainMessage(H.BOOT_TIMEOUT);
+            mH.sendMessageDelayed(msg, 30*1000);
         }
 
         mPolicy.systemBooted();
@@ -5553,7 +5569,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!mSystemBooted && !mShowingBootMessages) {
             return;
         }
-        mH.sendEmptyMessage(H.ENABLE_SCREEN);
+        mH.sendMessage(mH.obtainMessage(H.ENABLE_SCREEN));
     }
 
     public void performBootTimeout() {
@@ -6132,7 +6148,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowsFreezingScreen = true;
         mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-        mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
+        mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_FREEZE_TIMEOUT),
                 WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         getDefaultDisplayContentLocked().layoutNeeded = true;
@@ -6915,67 +6931,101 @@ public class WindowManagerService extends IWindowManager.Stub
         return sw;
     }
 
-    boolean computeScreenConfigurationLocked(Configuration config) {
-        if (!mDisplayReady) {
-            return false;
-        }
+    private static class ApplicationDisplayMetrics {
+        boolean rotated;
+        int dh;
+        int dw;
+        int appWidth;
+        int appHeight;
+    }
 
-        // TODO(multidisplay): For now, apply Configuration to main screen only.
-        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+    private ApplicationDisplayMetrics calculateDisplayMetrics(DisplayContent displayContent) {
+        ApplicationDisplayMetrics dm = new ApplicationDisplayMetrics();
 
-        // Use the effective "visual" dimensions based on current rotation
-        final boolean rotated = (mRotation == Surface.ROTATION_90
-                || mRotation == Surface.ROTATION_270);
-        final int realdw = rotated ?
+        dm.rotated = (mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270);
+        final int realdw = dm.rotated ?
                 displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
-        final int realdh = rotated ?
+        final int realdh = dm.rotated ?
                 displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
-        int dw = realdw;
-        int dh = realdh;
+
+        dm.dw = realdw;
+        dm.dh = realdh;
 
         if (mAltOrientation) {
             if (realdw > realdh) {
                 // Turn landscape into portrait.
                 int maxw = (int)(realdh/1.3f);
                 if (maxw < realdw) {
-                    dw = maxw;
+                    dm.dw = maxw;
                 }
             } else {
                 // Turn portrait into landscape.
                 int maxh = (int)(realdw/1.3f);
                 if (maxh < realdh) {
-                    dh = maxh;
+                    dm.dh = maxh;
                 }
             }
         }
+
+        return dm;
+    }
+
+    private ApplicationDisplayMetrics updateApplicationDisplayMetricsLocked(
+            DisplayContent displayContent) {
+        if (!mDisplayReady) {
+            return null;
+        }
+
+        final ApplicationDisplayMetrics m = calculateDisplayMetrics(displayContent);
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+
+        m.appWidth = mPolicy.getNonDecorDisplayWidth(m.dw, m.dh, mRotation);
+        m.appHeight = mPolicy.getNonDecorDisplayHeight(m.dw, m.dh, mRotation);
+
+        synchronized(displayContent.mDisplaySizeLock) {
+            displayInfo.rotation = mRotation;
+            displayInfo.logicalWidth = m.dw;
+            displayInfo.logicalHeight = m.dh;
+            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
+            displayInfo.appWidth = m.appWidth;
+            displayInfo.appHeight = m.appHeight;
+            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
+            displayInfo.getAppMetrics(mDisplayMetrics, null);
+            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+                    displayContent.getDisplayId(), displayInfo);
+
+            mAnimator.setDisplayDimensions(m.dw, m.dh, m.appWidth, m.appHeight);
+        }
+
+        if (false) {
+            Slog.i(TAG, "Set app display size: " + m.appWidth + " x " + m.appHeight);
+        }
+
+        return m;
+    }
+
+    boolean computeScreenConfigurationLocked(Configuration config) {
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Update application display metrics.
+        final ApplicationDisplayMetrics appDm = updateApplicationDisplayMetricsLocked(
+                displayContent);
+
+        if (appDm == null) {
+            return false;
+        }
+
+        final boolean rotated = appDm.rotated;
+        final int dw = appDm.dw;
+        final int dh = appDm.dh;
 
         if (config != null) {
             config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                     Configuration.ORIENTATION_LANDSCAPE;
         }
 
-        // Update application display metrics.
-        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
-        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayInfo.rotation = mRotation;
-            displayInfo.logicalWidth = dw;
-            displayInfo.logicalHeight = dh;
-            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
-            displayInfo.appWidth = appWidth;
-            displayInfo.appHeight = appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
-            displayInfo.getAppMetrics(mDisplayMetrics, null);
-            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
-                    displayContent.getDisplayId(), displayInfo);
-
-            mAnimator.setDisplayDimensions(dw, dh, appWidth, appHeight);
-        }
-        if (false) {
-            Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
-        }
-
         final DisplayMetrics dm = mDisplayMetrics;
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
@@ -7664,7 +7714,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (mAnimator.mAnimating || mLayoutToAnim.mAnimationScheduled) {
                                 // If we are animating, don't do the gc now but
                                 // delay a bit so we don't interrupt the animation.
-                                sendEmptyMessageDelayed(H.FORCE_GC, 2000);
+                                mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
+                                        2000);
                                 return;
                             }
                             // If we are currently rotating the display, it will
@@ -7789,7 +7840,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Used to send multiple changes from the animation side to the layout side.
                     synchronized (mWindowMap) {
                         if (copyAnimToLayoutParamsLocked()) {
-                            sendEmptyMessage(CLEAR_PENDING_ACTIONS);
+                            mH.sendEmptyMessage(CLEAR_PENDING_ACTIONS);
                             performLayoutAndPlaceSurfacesLocked();
                         }
                     }
@@ -8378,7 +8429,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mWindowsChanged && !mWindowChangeListeners.isEmpty()) {
                 mH.removeMessages(H.REPORT_WINDOWS_CHANGE);
-                mH.sendEmptyMessage(H.REPORT_WINDOWS_CHANGE);
+                mH.sendMessage(mH.obtainMessage(H.REPORT_WINDOWS_CHANGE));
             }
         } catch (RuntimeException e) {
             mInLayout = false;
@@ -8574,8 +8625,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // XXX should probably keep timeout from
                 // when we first froze the display.
                 mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, 
-                        WINDOW_FREEZE_TIMEOUT_DURATION);
+                mH.sendMessageDelayed(mH.obtainMessage(
+                        H.WINDOW_FREEZE_TIMEOUT), WINDOW_FREEZE_TIMEOUT_DURATION);
             }
         }
     }
@@ -9489,9 +9540,31 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ORIENTATION &&
                         winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING) Slog.i(
                         TAG, "Resizing " + win + " WITH DRAW PENDING");
-                win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
-                        winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING,
-                        configChanged ? win.mConfiguration : null);
+                final boolean reportDraw
+                        = winAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
+                final Configuration newConfig = configChanged ? win.mConfiguration : null;
+                if (win.mClient instanceof IWindow.Stub) {
+                    // Simulate one-way call if win.mClient is a local object.
+                    final IWindow client = win.mClient;
+                    final Rect frame = win.mFrame;
+                    final Rect contentInsets = win.mLastContentInsets;
+                    final Rect visibleInsets = win.mLastVisibleInsets;
+                    mH.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                client.resized(frame, contentInsets, visibleInsets,
+                                               reportDraw, newConfig);
+                            } catch (RemoteException e) {
+                                // Actually, it's not a remote call.
+                                // RemoteException mustn't be raised.
+                            }
+                        }
+                    });
+                } else {
+                    win.mClient.resized(win.mFrame, win.mLastContentInsets, win.mLastVisibleInsets,
+                                        reportDraw, newConfig);
+                }
                 win.mContentInsetsChanged = false;
                 win.mVisibleInsetsChanged = false;
                 winAnimator.mSurfaceResized = false;
@@ -10252,7 +10325,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // processes holds on others can be released if they are
         // no longer needed.
         mH.removeMessages(H.FORCE_GC);
-        mH.sendEmptyMessageDelayed(H.FORCE_GC, 2000);
+        mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
+                2000);
 
         mScreenFrozenLock.release();
         
@@ -10326,6 +10400,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mLastStatusBarVisibility = visibility;
             visibility = mPolicy.adjustSystemUiVisibilityLw(visibility);
+            visibility &= ~mStatusBarVisibilityMask;
             updateStatusBarVisibilityLocked(visibility);
         }
     }
@@ -10364,6 +10439,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void reevaluateStatusBarVisibility() {
         synchronized (mWindowMap) {
             int visibility = mPolicy.adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
+            visibility &= ~mStatusBarVisibilityMask;
             updateStatusBarVisibilityLocked(visibility);
             performLayoutAndPlaceSurfacesLocked();
         }
@@ -10431,6 +10507,56 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         mPolicy.showAssistant();
+    }
+
+    public void updateDisplayMetrics() {
+        long origId = Binder.clearCallingIdentity();
+        boolean changed = false;
+
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            final DisplayInfo displayInfo =
+                    displayContent != null ? displayContent.getDisplayInfo() : null;
+            final int oldWidth = displayInfo != null ? displayInfo.appWidth : -1;
+            final int oldHeight = displayInfo != null ? displayInfo.appHeight : -1;
+            final ApplicationDisplayMetrics metrics =
+                    updateApplicationDisplayMetricsLocked(displayContent);
+
+            if (metrics != null && oldWidth >= 0 && oldHeight >= 0) {
+                changed = oldWidth != metrics.appWidth || oldHeight != metrics.appHeight;
+            }
+        }
+
+        if (changed) {
+            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
+        }
+
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    /**
+     * Tries to set the status bar visibilty mask. This will fail if the mask was set already.
+     *
+     * @param mask specifies the positive mask. E.g. all bit that should be masked out are set.
+     */
+    public boolean updateStatusBarVisibilityMask(int mask) {
+        boolean result = false;
+        synchronized(mWindowMap) {
+            if (mStatusBarVisibilityMask == 0) {
+                mStatusBarVisibilityMask = mask;
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Call this, only if {@link #updateStatusBarVisibilityMask(int)} returned {@code true}.
+     */
+    public void resetStatusBarVisibilityMask() {
+        synchronized(mWindowMap) {
+            mStatusBarVisibilityMask = 0;
+        }
     }
 
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {

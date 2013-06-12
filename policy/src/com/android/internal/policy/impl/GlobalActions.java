@@ -35,7 +35,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
-import android.hardware.input.InputManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -58,7 +57,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.InputDevice;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -113,18 +111,16 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
-    private NavBarAction mNavBarHideToggle;
     private ToggleAction mExpandDesktopModeOn;
 
     private MyAdapter mAdapter;
 
-    private boolean mKeyguardShowing = false;
+    private boolean mKeyguardLocked = false;
     private boolean mDeviceProvisioned = false;
     private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
-    private boolean mEnableNavBarHideToggle = true;
     private Profile mChosenProfile;
 
     /**
@@ -162,10 +158,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     /**
      * Show the global actions dialog (creating if necessary)
-     * @param keyguardShowing True if keyguard is showing
+     * @param keyguardLocked True if keyguard is locked
      */
-    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
-        mKeyguardShowing = keyguardShowing;
+    public void showDialog(boolean keyguardLocked, boolean isDeviceProvisioned) {
+        mKeyguardLocked = keyguardLocked;
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog != null) {
             if (mUiContext != null) {
@@ -226,7 +222,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mExpandDesktopModeOn = new ToggleAction(
                 R.drawable.ic_lock_expanded_desktop,
-                R.drawable.ic_lock_expanded_desktop,
+                R.drawable.ic_lock_expanded_desktop_off,
                 R.string.global_actions_toggle_expanded_desktop_mode,
                 R.string.global_actions_expanded_desktop_mode_on_status,
                 R.string.global_actions_expanded_desktop_mode_off_status) {
@@ -244,10 +240,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         };
         onExpandDesktopModeChanged();
-
-        mEnableNavBarHideToggle= Settings.System.getBoolean(mContext.getContentResolver(),
-            Settings.System.POWER_DIALOG_SHOW_NAVBAR_HIDE, false);
-        mNavBarHideToggle = new NavBarAction(mHandler);
 
         mAirplaneModeOn = new ToggleAction(
                 R.drawable.ic_lock_airplane_mode,
@@ -339,15 +331,63 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 });
         }
 
+        // next: profile
+        // only shown if both system profiles and the menu item is enabled, enabled by default
+        if ((Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SYSTEM_PROFILES_ENABLED, 1) == 1) &&
+                (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1) == 1)) {
+            mItems.add(
+                new ProfileChooseAction() {
+                    public void onPress() {
+                        createProfileDialog();
+                    }
+
+                    public boolean onLongPress() {
+                        return true;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return false;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                });
+        }
+
+        // next: screenshot
+        // only shown if enabled, disabled by default
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_SCREENSHOT_ENABLED, 0) == 1) {
+            mItems.add(
+                new SinglePressAction(R.drawable.ic_lock_screenshot, R.string.global_action_screenshot) {
+                    public void onPress() {
+                        takeScreenshot();
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return true;
+                    }
+                });
+        }
+
+        // next: expanded desktop toggle
+        // only shown if enabled, disabled by default
+        if(Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 0) == 1){
+            mItems.add(mExpandDesktopModeOn);
+        }
+
         // next: airplane mode
         if (Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.POWER_MENU_AIRPLANE_ENABLED, 1) == 1) {
             mItems.add(mAirplaneModeOn);
-        }
-
-        // Next NavBar Hide
-        if(mEnableNavBarHideToggle) {
-            mItems.add(mNavBarHideToggle);
         }
 
         // next: bug report, if enabled
@@ -395,59 +435,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
                     public boolean showBeforeProvisioning() {
                         return false;
-                    }
-                });
-        }
-
-        // next: expanded desktop toggle
-        // only shown if enabled, disabled by default
-        if(Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_EXPANDED_DESKTOP_ENABLED, 0) == 1){
-            mItems.add(mExpandDesktopModeOn);
-        }
-
-        // next: profile
-        // only shown if both system profiles and the menu item is enabled, enabled by default
-        if ((Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SYSTEM_PROFILES_ENABLED, 1) == 1) &&
-                (Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1) == 1)) {
-            mItems.add(
-                new ProfileChooseAction() {
-                    public void onPress() {
-                        createProfileDialog();
-                    }
-
-                    public boolean onLongPress() {
-                        return true;
-                    }
-
-                    public boolean showDuringKeyguard() {
-                        return false;
-                    }
-
-                    public boolean showBeforeProvisioning() {
-                        return false;
-                    }
-                });
-        }
-
-        // next: screenshot
-        // only shown if enabled, disabled by default
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_SCREENSHOT_ENABLED, 0) == 1) {
-            mItems.add(
-                new SinglePressAction(R.drawable.ic_lock_screenshot, R.string.global_action_screenshot) {
-                    public void onPress() {
-                        takeScreenshot();
-                    }
-
-                    public boolean showDuringKeyguard() {
-                        return true;
-                    }
-
-                    public boolean showBeforeProvisioning() {
-                        return true;
                     }
                 });
         }
@@ -676,12 +663,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
         if (SHOW_SILENT_TOGGLE) {
-            try {
-                mContext.unregisterReceiver(mRingerModeReceiver);
-            } catch (IllegalArgumentException ie) {
-                // ignore this
-                Log.w(TAG, ie);
-            }
+            mContext.unregisterReceiver(mRingerModeReceiver);
         }
     }
 
@@ -696,7 +678,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /**
      * The adapter used for the list within the global actions dialog, taking
      * into account whether the keyguard is showing via
-     * {@link GlobalActions#mKeyguardShowing} and whether the device is provisioned
+     * {@link GlobalActions#mKeyguardLocked} and whether the device is provisioned
      * via {@link GlobalActions#mDeviceProvisioned}.
      */
     private class MyAdapter extends BaseAdapter {
@@ -707,7 +689,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
 
-                if (mKeyguardShowing && !action.showDuringKeyguard()) {
+                if (mKeyguardLocked && !action.showDuringKeyguard()) {
                     continue;
                 }
                 if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
@@ -733,7 +715,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             int filteredPos = 0;
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
-                if (mKeyguardShowing && !action.showDuringKeyguard()) {
+                if (mKeyguardLocked && !action.showDuringKeyguard()) {
                     continue;
                 }
                 if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
@@ -748,7 +730,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             throw new IllegalArgumentException("position " + position
                     + " out of range of showable actions"
                     + ", filtered count=" + getCount()
-                    + ", keyguardshowing=" + mKeyguardShowing
+                    + ", keyguardlocked=" + mKeyguardLocked
                     + ", provisioned=" + mDeviceProvisioned);
         }
 
@@ -878,9 +860,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         abstract public void onPress();
 
         public View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = (convertView != null) ?
-                    convertView :
-                    inflater.inflate(R.layout.global_actions_item, parent, false);
+            View v = inflater.inflate(R.layout.global_actions_item, parent, false);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
@@ -1125,123 +1105,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mAudioManager.setRingerMode(indexToRingerMode(index));
             mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
         }
-    }
-
-    private static class NavBarAction implements Action, View.OnClickListener {
-
-        private final int[] ITEM_IDS = { R.id.navbartoggle, R.id.navbarhome, R.id.navbarback,R.id.navbarmenu };
-
-        public Context mContext;
-        public boolean mNavbarVisible;
-        private final Handler mHandler;
-        private int mInjectKeycode;
-        long mDownTime;
-
-        NavBarAction(Handler handler) {
-            mHandler = handler;
-        }
-
-
-        public View create(Context context, View convertView, ViewGroup parent,
-                LayoutInflater inflater) {
-            mContext = context;
-            mNavbarVisible = Settings.System.getBoolean(mContext.getContentResolver(),
-                    Settings.System.NAVIGATION_BAR_SHOW_NOW, false);
-
-            View v = inflater.inflate(R.layout.global_actions_navbar_mode, parent, false);
-
-            for (int i = 0; i < 4; i++) {
-                View itemView = v.findViewById(ITEM_IDS[i]);
-                itemView.setSelected((i==0)&&(mNavbarVisible));
-                // Set up click handler
-                itemView.setTag(i);
-                itemView.setOnClickListener(this);
-            }
-            return v;
-        }
-
-        public void onPress() {
-        }
-
-        public boolean onLongPress() {
-            return false;
-        }
-
-        public boolean showDuringKeyguard() {
-            return false;
-        }
-
-        public boolean showBeforeProvisioning() {
-            return false;
-        }
-
-        public boolean isEnabled() {
-            return true;
-        }
-
-        void willCreate() {
-        }
-
-        public void onClick(View v) {
-            if (!(v.getTag() instanceof Integer)) return;
-
-            int index = (Integer) v.getTag();
-
-            switch (index) {
-
-            case 0 :
-                mNavbarVisible = !mNavbarVisible;
-                Settings.System.putBoolean(mContext.getContentResolver(),
-                        Settings.System.NAVIGATION_BAR_SHOW_NOW,
-                         mNavbarVisible );
-                v.setSelected(mNavbarVisible);
-                mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                break;
-
-            case 1:
-                injectKeyDelayed(KeyEvent.KEYCODE_HOME,SystemClock.uptimeMillis());
-                break;
-
-            case 2:
-                injectKeyDelayed(KeyEvent.KEYCODE_BACK,SystemClock.uptimeMillis());
-                break;
-
-            case 3:
-                injectKeyDelayed(KeyEvent.KEYCODE_MENU,SystemClock.uptimeMillis());
-                break;
-            }
-        }
-        public void injectKeyDelayed(int keycode,long downtime){
-            mInjectKeycode = keycode;
-            mDownTime = downtime;
-            mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-            mHandler.removeCallbacks(onInjectKey_Down);
-            mHandler.removeCallbacks(onInjectKey_Up);
-            mHandler.postDelayed(onInjectKey_Down,25);// wait a few ms to let Dialog dismiss
-            mHandler.postDelayed(onInjectKey_Up,50); // introduce small delay to handle key press
-        }
-
-        final Runnable onInjectKey_Down = new Runnable() {
-            public void run() {
-                final KeyEvent ev = new KeyEvent(mDownTime, SystemClock.uptimeMillis(), KeyEvent.ACTION_DOWN, mInjectKeycode, 0,
-                        0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                        KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
-                        InputDevice.SOURCE_KEYBOARD);
-                InputManager.getInstance().injectInputEvent(ev,
-                        InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT);
-            }
-        };
-
-        final Runnable onInjectKey_Up = new Runnable() {
-            public void run() {
-                final KeyEvent ev = new KeyEvent(mDownTime, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, mInjectKeycode, 0,
-                        0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                        KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
-                        InputDevice.SOURCE_KEYBOARD);
-                InputManager.getInstance().injectInputEvent(ev,
-                        InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT);
-            }
-        };
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

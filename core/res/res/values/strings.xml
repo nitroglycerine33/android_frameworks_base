@@ -68,23 +68,6 @@
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
 
-    <!-- Names of default profiles. -->
-    <string name="profileNameDefault">Default</string>
-    <string name="profileNameWork">Work</string>
-    <string name="profileNameHome">Home</string>
-    <string name="profileNameSilent">Silent</string>
-    <string name="profileNameNight">Night</string>
-
-    <!-- Names of application groups. -->
-    <string name="profileGroupPhone">Phone</string>
-    <string name="profileGroupCalendar">Calendar</string>
-    <string name="profileGroupGmail">Gmail</string>
-    <string name="profileGroupEmail">Email</string>
-    <string name="profileGroupSMS">SMS</string>
-
-    <!-- Name of wildcard profile. -->
-    <string name="wildcardProfile">Other</string>
-
     <!-- Displayed when a phone feature such as call barring was activated. -->
     <string name="serviceEnabled">Service was enabled.</string>
     <!-- Displayed in front of the list of a set of service classes
@@ -309,41 +292,6 @@
     <string name="screen_lock">Screen lock</string>
     <!-- Button to turn off the phone, within the Phone Options dialog -->
     <string name="power_off">Power off</string>
-
-    <!-- Button to reboot the phone, within the Phone Options dialog -->
-    <string name="reboot_system" product="tablet">Reboot tablet</string>
-    <string name="reboot_system" product="default">Reboot phone</string>
-    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
-    
-    <!-- label for item that screenshots in phone options dialog -->
-    <string name="global_action_screenshot">Screenshot</string>
-
-    <!-- label for item that toggles expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">Expanded desktop</string>
-    <!-- status message in phone options dialog for when expand desktop mode is on -->
-    <string name="global_actions_expanded_desktop_mode_on_status">Enabled</string>
-    <!-- status message in phone options dialog for when expand desktop mode is off -->
-    <string name="global_actions_expanded_desktop_mode_off_status">Disabled</string>
-
-    <!-- Button to reboot the phone, within the Reboot Options dialog -->
-    <string name="reboot_reboot">Reboot</string>
-    <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
-    <string name="reboot_recovery">Recovery</string>
-    <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
-    <string name="reboot_bootloader">Bootloader</string>
-    <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
-    <string name="reboot_bootmenu">Bootmenu</string>
-    <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
-    <string name="reboot_fastboot">Fastboot</string>
-    <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
-    <string name="reboot_download">Download</string>
-
-    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
-    <string name="reboot_progress">Rebooting\u2026</string>
-    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
-    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
-    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
-
     <!-- Spoken description for ringer silent option. [CHAR LIMIT=NONE] -->
     <string name="silent_mode_silent">Ringer off</string>
     <!-- Spoken description for ringer vibrate option. [CHAR LIMIT=NONE] -->
@@ -408,6 +356,7 @@
         current device state, to send as an e-mail message.  It will take a little
         time from starting the bug report until it is ready to be sent; please be
         patient.</string>
+
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
@@ -425,9 +374,6 @@
 
     <!-- status message in phone options dialog for when airplane mode is off -->
     <string name="global_actions_airplane_mode_off_status">Airplane mode is OFF</string>
-
-    <!-- label for item that toggles NavBar Hide -->
-    <string name="global_actions_toggle_navbar_hide">Navigation Bar Controls</string>
 
     <!-- Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
@@ -590,10 +536,6 @@
     <string name="permgroupdesc_storage" product="default">Access the SD card.</string>
 
     <!--  Permissions -->
-
-    <!-- Superuser application permission, allows applications to call the superuser binary (su) -->
-    <string name="permlab_accessSuperuser">full permissions to all device features and storage</string>
-    <string name="permdesc_accessSuperuser">Superuser grants full access to all device features and storage, including the secure and sensitive hardware elements of your device. This permission is potentially dangerous.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_statusBar">disable or modify status bar</string>
@@ -1079,11 +1021,6 @@
     <string name="permlab_movePackage">move app resources</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_movePackage">Allows the app to move app resources from internal to external media and vice versa.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_preventpower">prevent power key</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_preventpower">Allows an application to override the power key</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readLogs">read sensitive log data</string>
@@ -2162,7 +2099,6 @@
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, show the current charge %.  -->
     <string name="lockscreen_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <string name="lockscreen_discharging">Discharging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
     <string name="lockscreen_charged">Charged</string>
@@ -3354,7 +3290,7 @@
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">Android debugging enabled</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_message">Select to disable debugging.</string>
+    <string name="adb_active_notification_message">Touch to disable debugging.</string>
 
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
@@ -3775,9 +3711,6 @@
     <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_card">SD card</string>
 
-    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
-    <string name="storage_sd_dock_card">Dock SD card</string>
-
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>
 
@@ -3870,12 +3803,6 @@
 
     <!-- STK setup Call -->
     <string name="SetupCallDefault">Accept call?</string>
-
-    <!-- Long-press back kill application -->
-    <string name="app_killed_message">Application killed</string>
-
-    <!-- Notification for Expanded desktop default -->
-    <string name="expanded_mode_default_set">Expanded desktop set to hide StatusBar only. Configure in Power menu settings</string>
 
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
@@ -4077,18 +4004,5 @@
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
-
-    <!-- label for item that reboots the phone in phone options dialog -->
-    <string name="global_action_reboot">Reboot</string>
-
-    <!-- label for item that opens the profile choosing dialog -->
-    <string name="global_action_choose_profile">Profile</string>
-
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
-
-    <!-- In WiFi notification -->
-    <string name="notify_turn_wifi_off_title">Turn Wi-Fi off</string>
 
 </resources>

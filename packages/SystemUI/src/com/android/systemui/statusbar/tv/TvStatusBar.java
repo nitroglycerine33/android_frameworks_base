@@ -21,7 +21,6 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 import android.os.IBinder;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
@@ -59,14 +58,11 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void disable(int state) {
+        propagateDisabledFlags(state);
     }
 
     @Override
     public void animateExpandNotificationsPanel() {
-    }
-
-    @Override
-    public void animateCollapsePanels() {
     }
 
     @Override
@@ -79,6 +75,7 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void topAppWindowChanged(boolean visible) {
+        propagateMenuVisibility(visible);
     }
 
     @Override
@@ -90,27 +87,12 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void toggleNotificationShade() {
-    }
-
-    @Override
-    protected void onBarTouchEvent(MotionEvent ev) {
-    }
-
-    @Override
-    protected void showBar(boolean showSearch){
-    }
-
-    @Override
-    protected void setSearchLightOn(boolean on){
-    }
-
-    @Override
     public void toggleRecentApps() {
     }
 
     @Override // CommandQueue
     public void setNavigationIconHints(int hints) {
+        propagateNavigationIconHints(hints);
     }
 
     @Override

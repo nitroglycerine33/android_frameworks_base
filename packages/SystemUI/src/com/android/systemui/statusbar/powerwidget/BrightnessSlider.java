@@ -191,4 +191,4 @@ public class BrightnessSlider implements ToggleSlider.Listener {
             updateValues();
         }
     }
-}
+} 

@@ -158,11 +158,11 @@
     <!-- Height of the notification panel header bar -->
     <dimen name="notification_panel_header_height">48dp</dimen>
 
-    <!-- Height of the notification panel brightness slider -->
-    <dimen name="notification_panel_brightness_height">42dp</dimen>
-
     <!-- Height of the notification panel widget bar -->
     <dimen name="notification_panel_widget_height">48dp</dimen>
+
+    <!-- Height of the notification panel header and widget -->
+    <dimen name="notification_panel_header_and_widget">96dp</dimen>
 
     <!-- Extra space above the panel -->
     <dimen name="notification_panel_padding_top">0dp</dimen>
@@ -212,70 +212,33 @@
     <!-- For phones, this is close_handle_height + header_height -->
     <dimen name="peek_height">84dp</dimen>
 
-    <!-- Notification Shortcuts -->
-    <dimen name="notification_shortcuts_close_handle_height">28dp</dimen>
-    <dimen name="notification_shortcuts_spacing_height">88dp</dimen>
-    <dimen name="notification_shortcuts_drawer_margin">56dp</dimen>
+    <!-- The padding of the items of the battery cluster -->
+    <dimen name="status_bar_battery_cluster_padding">2dip</dimen>
+    <!-- The margin adjusment of the text items of the battery cluster -->
+    <dimen name="status_bar_battery_cluster_text_margin">-1dip</dimen>
 
-    <!--  Tablet UI Stuff -->
-    <!-- The minimum height of the notification panel window -->
-    <dimen name="notification_panel_min_height">300dp</dimen>
-    <!-- Bottom margin (from display edge) for status bar panels -->
-    <dimen name="panel_float">10dp</dimen>
-    <!-- The width of the ticker, including the icon -->
-    <dimen name="notification_ticker_width">280dp</dimen>
-    <!-- The width of the notification panel window -->
-    <dimen name="notification_panel_width">300dp</dimen>
-    <!-- The height of the notification panel title -->
-    <dimen name="notification_panel_title_height">130dp</dimen>
-    <!--  Amount of Margin to offset NavRing in Portrait Mode -->
-    <dimen name="navring_left_margin_port">-600dp</dimen>
-    <!--  Amount of Margin to offset NavRing in Landscape Mode -->
-    <dimen name="navring_left_margin_land">-800dp</dimen>
-    <!--  Height of NavRing in Tablet Mode Landscape -->
-    <dimen name="navring_height_tablet_landscape">300dp</dimen>
-    <!--  Height of NavRing in Tablet Mode Portrait -->
-    <dimen name="navring_height_tablet_portrait">250dp</dimen>
-    <!--  Radius of NavRing in Tablet Mode Landscape -->
-    <dimen name="navring_radius_tablet_landscape">300dp</dimen>
-    <!--  Radius of NavRing in Tablet Mode Landscape -->
-    <dimen name="navring_radius_tablet_portrait">300dp</dimen>
+    <!-- ==================== pie controls ==================== -->
+    <!-- Padding between the pie controls and the screen border -->
+    <dimen name="pie_padding">16dp</dimen>
 
-    <!-- Constant for hidden navbar drag handle -->
-    <dimen name="drag_handle_height">10dp</dimen>
-
-    <!-- PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE -->
-    <dimen name="pie_trigger_height">12dp</dimen>
-
-    <dimen name="pie_radius_start">65dp</dimen>
-    <dimen name="pie_radius_increment">80dp</dimen>
-    <dimen name="pie_outline">1.5dp</dimen>
-    <dimen name="pie_chevron_start">240dp</dimen>
-    <dimen name="pie_chevron_start_right">240dp</dimen>
-    <dimen name="pie_chevron_increment">2dp</dimen>
-    <dimen name="pie_chevron_increment_right">2dp</dimen>
-    <dimen name="pie_battery_start">155dp</dimen>
-    <dimen name="pie_battery_increment">10dp</dimen>
-    <dimen name="pie_status_start">155dp</dimen>
-    <dimen name="pie_notifications_start">250dp</dimen>
-
-    <dimen name="pie_clock_size">58dp</dimen>
-    <dimen name="pie_clock_offset">-20dp</dimen>
-    <dimen name="pie_ampm_size">15dp</dimen>
-    <dimen name="pie_ampm_offset">-67dp</dimen>
-    <dimen name="pie_status_size">12dp</dimen>
-    <dimen name="pie_status_offset">-14dp</dimen>
-    <dimen name="pie_notification_size">13dp</dimen>
-    <dimen name="pie_notification_row_size">16dp</dimen>
-    <dimen name="pie_notification_icon_size">15dp</dimen>
-
+    <!-- Radius of the snap points a the border of the screen -->
     <dimen name="pie_snap_radius">30dp</dimen>
-    <dimen name="pie_snap_thickness">6dp</dimen>
+    <!-- Stroke width of the snap points -->
+    <dimen name="pie_snap_outline">4dp</dimen>
 
-    <dimen name="pie_touch_offset">15dp</dimen>
-    <dimen name="pie_tab_title_height">24dp</dimen>
-    <dimen name="pie_item_size">40dp</dimen>
+    <dimen name="pie_outline">2dp</dimen>
+    <!-- Text size of "normal" / small text on the pie control -->
+    <dimen name="pie_textsize">12sp</dimen>
+    <!-- Minimum size of imageviews placed within pie items -->
+    <dimen name="pie_item_size">30dp</dimen>
 
-    <dimen name="pie_panel_padding">20dp</dimen>
-    <!-- PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE PIE -->
+    <dimen name="pie_navbar_radius">70dp</dimen>
+    <dimen name="pie_navbar_height">85dp</dimen>
+
+    <dimen name="pie_sysinfo_radius">165dp</dimen>
+    <dimen name="pie_sysinfo_height">85sp</dimen>
+
+    <!-- Height of the notification panel brightness slider -->
+    <dimen name="notification_panel_brightness_height">42dp</dimen>
+
 </resources>

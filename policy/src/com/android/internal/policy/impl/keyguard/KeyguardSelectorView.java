@@ -51,10 +51,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.Gravity;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.internal.telephony.IccCardConstants.State;
@@ -72,7 +69,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     private KeyguardSecurityCallback mCallback;
     private GlowPadView mGlowPadView;
-    private KeyguardShortcuts mShortcuts;
     private ObjectAnimator mAnim;
     private View mFadeView;
     private boolean mIsBouncing;
@@ -152,10 +148,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
         }
 
-        public void onTargetChange(View v, int target) {
-
-        }
-
         public void onFinishFinalAnimation() {
 
         }
@@ -188,6 +180,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         @Override
+        protected void dismissKeyguardOnNextActivity() {
+            getCallback().dismiss(false);
+        }
+
+        @Override
         Context getContext() {
             return mContext;
         }};
@@ -205,43 +202,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        Resources res = getResources();
-
-        LinearLayout glowPadContainer = (LinearLayout) findViewById(R.id.keyguard_glow_pad_container);
-        glowPadContainer.bringToFront();
-        final boolean isLandscape = res.getSystem().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        if (glowPadContainer != null && isShortcuts() && isLandscape && !isScreenLarge() && !isEightTargets()) {
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL
-            );
-            int pxBottom = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                60,
-                res.getDisplayMetrics());
-            params.setMargins(0, 0, 0, -pxBottom);
-            glowPadContainer.setLayoutParams(params);
-        }
-
-        if (glowPadContainer != null && isEightTargets()) {
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    Gravity.CENTER
-            );
-            int pxBottom = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                10,
-                res.getDisplayMetrics());
-            params.setMargins(0, 0, 0, -pxBottom);
-            glowPadContainer.setLayoutParams(params);
-        }
-
-        LinearLayout msgAndShortcutsContainer = (LinearLayout) findViewById(R.id.keyguard_message_and_shortcuts);
-        msgAndShortcutsContainer.bringToFront();
-
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         updateTargets();
@@ -261,20 +221,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         boolean isScreenLarge = screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE ||
                 screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
         return isScreenLarge;
-    }
-
-    private boolean isShortcuts() {
-        final String apps = Settings.System.getStringForUser(mContext.getContentResolver(),
-                Settings.System.LOCKSCREEN_SHORTCUTS, UserHandle.USER_CURRENT);
-        if (apps == null || apps.isEmpty()) return false;
-        return true;
-    }
-
-    private boolean isEightTargets() {
-        final int storedVal = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.LOCKSCREEN_EIGHT_TARGETS, 0, UserHandle.USER_CURRENT);
-        if (storedVal == 0) return false;
-        return true;
     }
 
     private StateListDrawable getLayeredDrawable(Drawable back, Drawable front, int inset, boolean frontBlank) {
@@ -370,6 +316,9 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                     .ic_lockscreen_camera, !mCameraDisabled);
             mGlowPadView.setEnableTarget(com.android.internal.R.drawable
                     .ic_action_assist_generic, !mSearchDisabled);
+
+            // Enable magnetic targets
+            mGlowPadView.setMagneticTargets(true);
         } else {
             mStoredTargets = storedVal.split("\\|");
             mIsScreenLarge = isScreenLarge();
@@ -380,6 +329,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
             final boolean isLandscape = mCreationOrientation == Configuration.ORIENTATION_LANDSCAPE;
             final Drawable blankActiveDrawable = res.getDrawable(R.drawable.ic_lockscreen_target_activated);
             final InsetDrawable activeBack = new InsetDrawable(blankActiveDrawable, 0, 0, 0, 0);
+            // Disable magnetic target
+            mGlowPadView.setMagneticTargets(false);
             //Magnetic target replacement
             final Drawable blankInActiveDrawable = res.getDrawable(com.android.internal.R.drawable.ic_lockscreen_lock_pressed);
             final Drawable unlockActiveDrawable = res.getDrawable(com.android.internal.R.drawable.ic_lockscreen_unlock_activated);
@@ -500,10 +451,6 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
         mCallback = callback;
-        mShortcuts = (KeyguardShortcuts) findViewById(R.id.shortcuts);
-        if (mShortcuts != null) {
-            mShortcuts.setKeyguardCallback(callback);
-        }
     }
 
     public void setLockPatternUtils(LockPatternUtils utils) {

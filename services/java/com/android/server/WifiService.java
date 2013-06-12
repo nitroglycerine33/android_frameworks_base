@@ -33,6 +33,7 @@ import android.database.ContentObserver;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiChannel;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
@@ -177,15 +178,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     private static final int ICON_NETWORKS_AVAILABLE =
             com.android.internal.R.drawable.stat_notify_wifi_in_range;
-    /**
-     * Listen for this intent when the notification is showing
-     */
-    private static final String ACTION_TURN_WIFI_OFF = "com.android.server.WifiService.ACTION_TURN_WIFI_OFF";
-    /**
-     * Turns wifi off when run (IntentFilter responsible for specifying the action 
-     * ACTION_TURN_WIFI_OFF)
-     */
-    private static NotificationBroadcastReciever mNotificationBroadcastReceiver = null;
     /**
      * When a notification is shown, we wait this amount before possibly showing it again.
      */
@@ -938,6 +930,31 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
+     * Is Ad-Hoc (IBSS) mode supported by the driver?
+     * Will only return correct results when we have reached WIFI_STATE_ENABLED
+     * @return {@code true} if IBSS mode is supported, {@code false} if not
+     */
+    public boolean isIbssSupported() {
+        enforceAccessPermission();
+        if (mWifiStateMachineChannel != null) {
+            return (mWifiStateMachine.syncIsIbssSupported(mWifiStateMachineChannel) == 1);
+        } else {
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            return false;
+        }
+    }
+
+    public List<WifiChannel> getSupportedChannels() {
+        enforceAccessPermission();
+        if (mWifiStateMachineChannel != null) {
+            return (mWifiStateMachine.syncGetSupportedChannels(mWifiStateMachineChannel));
+        } else {
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            return null;
+        }
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
@@ -1595,7 +1612,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         int uid = Binder.getCallingUid();
-        final long ident = Binder.clearCallingIdentity();
+        Long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.noteWifiMulticastEnabled(uid);
         } catch (RemoteException e) {
@@ -1631,7 +1648,7 @@ public class WifiService extends IWifiManager.Stub {
             mWifiStateMachine.startFilteringMulticastV4Packets();
         }
 
-        final long ident = Binder.clearCallingIdentity();
+        Long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.noteWifiMulticastDisabled(uid);
         } catch (RemoteException e) {
@@ -1778,52 +1795,35 @@ public class WifiService extends IWifiManager.Stub {
             if (System.currentTimeMillis() < mNotificationRepeatTime) {
                 return;
             }
+
+            if (mNotification == null) {
+                // Cache the Notification object.
+                mNotification = new Notification();
+                mNotification.when = 0;
+                mNotification.icon = ICON_NETWORKS_AVAILABLE;
+                mNotification.flags = Notification.FLAG_AUTO_CANCEL;
+                mNotification.contentIntent = TaskStackBuilder.create(mContext)
+                        .addNextIntentWithParentStack(
+                                new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK))
+                        .getPendingIntent(0, 0, null, UserHandle.CURRENT);
+            }
+
             CharSequence title = mContext.getResources().getQuantityText(
                     com.android.internal.R.plurals.wifi_available, numNetworks);
             CharSequence details = mContext.getResources().getQuantityText(
                     com.android.internal.R.plurals.wifi_available_detailed, numNetworks);
-            mNotification = new Notification.Builder(mContext)
-                    .setWhen(0)
-                    .setSmallIcon(ICON_NETWORKS_AVAILABLE)
-                    .setAutoCancel(true)
-                    .setContentIntent(TaskStackBuilder.create(mContext)
-                        .addNextIntentWithParentStack(
-                                new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK))
-                        .getPendingIntent(0, 0, null, UserHandle.CURRENT))
-                    .addAction(com.android.internal.R.drawable.ic_stat_turn_wifi_off,
-                            mContext.getText(com.android.internal.R.string.notify_turn_wifi_off_title),
-                            PendingIntent.getBroadcast(mContext, 0,
-                                    new Intent(ACTION_TURN_WIFI_OFF).setPackage(mContext.getPackageName()), PendingIntent.FLAG_ONE_SHOT))
-                     .setTicker(title)
-                     .setContentTitle(title)
-                     .setContentText(details)
-                     .build();
+            mNotification.tickerText = title;
+            mNotification.setLatestEventInfo(mContext, title, details, mNotification.contentIntent);
 
             mNotificationRepeatTime = System.currentTimeMillis() + NOTIFICATION_REPEAT_DELAY_MS;
+
             notificationManager.notifyAsUser(null, ICON_NETWORKS_AVAILABLE, mNotification,
                     UserHandle.ALL);
-
-            if(mNotificationBroadcastReceiver == null) {
-                mNotificationBroadcastReceiver = new NotificationBroadcastReciever();
-                IntentFilter filter = new IntentFilter(ACTION_TURN_WIFI_OFF);
-                mContext.registerReceiver(mNotificationBroadcastReceiver, filter);
-            }
         } else {
-            if(mNotificationBroadcastReceiver != null) {
-                mContext.unregisterReceiver(mNotificationBroadcastReceiver);
-                mNotificationBroadcastReceiver = null;
-            }
             notificationManager.cancelAsUser(null, ICON_NETWORKS_AVAILABLE, UserHandle.ALL);
         }
 
         mNotificationShown = visible;
-    }
-
-    private class NotificationBroadcastReciever extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-                setWifiEnabled(false);
-        }
     }
 
     private class NotificationEnabledSettingObserver extends ContentObserver {

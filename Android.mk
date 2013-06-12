@@ -26,8 +26,6 @@ LOCAL_PATH := $(call my-dir)
 # TODO: find a more appropriate way to do this.
 framework_res_source_path := APPS/framework-res_intermediates/src
 
-# the library
-# ============================================================
 include $(CLEAR_VARS)
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
@@ -147,6 +145,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
+	core/java/android/service/pie/IPieService.aidl \
+	core/java/android/service/pie/IPieActivationListener.aidl \
+	core/java/android/service/pie/IPieHostCallback.aidl \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
@@ -224,7 +225,21 @@ LOCAL_SRC_FILES += \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
 	voip/java/android/net/sip/ISipSession.aidl \
 	voip/java/android/net/sip/ISipSessionListener.aidl \
-	voip/java/android/net/sip/ISipService.aidl
+	voip/java/android/net/sip/ISipService.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmReceiver.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmTransmitter.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStateChangedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStartedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnErrorListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedPauseListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedResetListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnBlockScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnRDSDataFoundListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnSignalStrengthListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStereoListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnExtraCommandListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnAutomaticSwitchListener.aidl
 #
 
 
@@ -558,7 +573,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
@@ -711,33 +726,6 @@ include $(BUILD_DROIDDOC)
 # explicitly specify that ds depends on framework-res and any generated docs
 $(full_target): framework-res-package-target
 
-
-#==== reference docs for GCM =======================
-
-include $(CLEAR_VARS)
-#
-gcm_docs_src_files += \
-        $(call all-java-files-under, ../../vendor/unbundled_google/libs/gcm/gcm-client/src) \
-        $(call all-java-files-under, ../../vendor/unbundled_google/libs/gcm/gcm-server/src) \
-        $(call all-html-files-under, ../../vendor/unbundled_google/libs/gcm/gcm-client/src) \
-        $(call all-html-files-under, ../../vendor/unbundled_google/libs/gcm/gcm-server/src) \
-
-LOCAL_SRC_FILES := $(gcm_docs_src_files)
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE:= online-gcm-ref
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-LOCAL_IS_HOST_MODULE := false
-
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR := build/tools/droiddoc/templates-sdk
-
-LOCAL_DROIDDOC_OPTIONS := \
-        -toroot / \
-        -gcmref \
-        -hdf android.whichdoc online \
-        -hdf template.showLanguageMenu true
-
-include $(BUILD_DROIDDOC)
-
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
 
@@ -792,7 +780,6 @@ LOCAL_MODULE := ext
 LOCAL_DX_FLAGS := --core-library
 
 include $(BUILD_JAVA_LIBRARY)
-
 
 # Include subdirectory makefiles
 # ============================================================

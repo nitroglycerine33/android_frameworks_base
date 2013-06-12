@@ -114,11 +114,6 @@ public class KeyguardSimPukView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected boolean getQuickUnlockAllowed() {
-        return false;
-    }
-
-    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 

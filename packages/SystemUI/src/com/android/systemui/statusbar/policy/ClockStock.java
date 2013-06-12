@@ -200,7 +200,9 @@ public class ClockStock extends TextView {
                 return formatted;
             }
         }
+ 
         return result;
 
     }
 }
+ 

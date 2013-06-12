@@ -1179,11 +1179,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("startUsingNetworkFeature reconnecting to " + networkType + ": " +
                                 feature);
                     }
-                    if (network.reconnect()) {
-                        return PhoneConstants.APN_REQUEST_STARTED;
-                    } else {
-                        return PhoneConstants.APN_REQUEST_FAILED;
-                    }
+                    network.reconnect();
+                    return PhoneConstants.APN_REQUEST_STARTED;
                 } else {
                     // need to remember this unsupported request so we respond appropriately on stop
                     synchronized(this) {

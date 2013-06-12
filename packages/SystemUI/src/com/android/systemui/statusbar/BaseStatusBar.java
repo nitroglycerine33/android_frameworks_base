@@ -25,13 +25,12 @@ import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.TransparencyManager;
 import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+import com.android.systemui.statusbar.policy.PieController;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.WidgetView;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -51,13 +50,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -67,12 +61,12 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.pie.PieManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -88,26 +82,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-
-import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
-import com.android.internal.statusbar.StatusBarNotification;
-import com.android.internal.widget.SizeAdaptiveLayout;
-import com.android.systemui.R;
-import com.android.systemui.SearchPanelView;
-import com.android.systemui.SystemUI;
-import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsActivity;
-import com.android.systemui.recent.TaskDescription;
-import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.Clock;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NotificationRowLayout;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.view.PieStatusPanel;
-import com.android.systemui.statusbar.view.PieExpandPanel;
 
 import java.util.ArrayList;
 
@@ -125,10 +99,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
     protected static final int MSG_SHOW_INTRUDER = 1026;
     protected static final int MSG_HIDE_INTRUDER = 1027;
-
-    protected int mCurrentUIMode;
-
-    private WidgetView mWidgetView;
 
     protected static final boolean ENABLE_INTRUDERS = false;
 
@@ -160,28 +130,34 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected FrameLayout mStatusBarContainer;
 
-    // Pie controls
-    public PieControlPanel mPieControlPanel;
-    public View mPieControlsTrigger;
-    public PieExpandPanel mContainer;
-    int mIndex;
+    /**
+     * An interface for navigation key bars to allow status bars to signal which keys are
+     * currently of interest to the user.<br>
+     * See {@link NavigationBarView} in Phone UI for an example.
+     */
+    public interface NavigationBarCallback {
+        /**
+         * @param hints flags from StatusBarManager (NAVIGATION_HINT...) to indicate which key is
+         * available for navigation
+         * @see StatusBarManager
+         */
+        public abstract void setNavigationIconHints(int hints);
+        /**
+         * @param showMenu {@code true} when an menu key should be displayed by the navigation bar.
+         */
+        public abstract void setMenuVisibility(boolean showMenu);
+        /**
+         * @param disabledFlags flags from View (STATUS_BAR_DISABLE_...) to indicate which key
+         * is currently disabled on the navigation bar.
+         * {@see View}
+         */
+        public void setDisabledFlags(int disabledFlags);
+    };
+    private ArrayList<NavigationBarCallback> mNavigationCallbacks =
+            new ArrayList<NavigationBarCallback>();
 
-    // Policy
-    public NetworkController mNetworkController;
-    public BatteryController mBatteryController;
-    public SignalClusterView mSignalCluster;
-    public Clock mClock;
-
-    // left-hand icons 
-    public LinearLayout mStatusIcons;
-
-    // Statusbar view container
-    public ViewGroup mBarView;
-
-    // Color fields
-    private Canvas mCurrentCanvas;
-    private Canvas mNewCanvas;
-    private TransitionDrawable mTransition;
+    // Pie Control
+    protected PieController mPieController;
 
     // UI-specific methods
 
@@ -195,36 +171,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IWindowManager mWindowManagerService;
     protected Display mDisplay;
 
-    public TransparencyManager mTransparencyManager;
-
     private boolean mDeviceProvisioned = false;
 
     private boolean mShowNotificationCounts;
-
-    public void collapse() {
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        if (mPieControlPanel != null) mPieControlPanel.bumpConfiguration();
-    }
-
-    public QuickSettingsContainerView getQuickSettingsPanel() {
-        // This method should be overriden
-        return null;
-    }
-
-    public IStatusBarService getService() {
-        return mBarService;
-    }
-
-    public NotificationData getNotificationData() {
-        return mNotificationData;
-    }
-
-    public NotificationRowLayout getNotificationRowLayout() {
-        return mPile;
-    }
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -232,27 +181,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public boolean isDeviceProvisioned() {
         return mDeviceProvisioned;
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_CONTROLS), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_TRIGGER), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.EXPANDED_DESKTOP_STATE), false, this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            updatePieControls();
-        }
     }
 
     private ContentObserver mProvisioningObserver = new ContentObserver(new Handler()) {
@@ -299,54 +227,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
-    private class PieControlsTouchListener implements View.OnTouchListener {
-        private int orient;
-        private boolean actionDown = false;
-        private boolean centerPie = true;
-        private float initialX = 0;
-        private float initialY = 0;
-        int index;
-
-        public PieControlsTouchListener() {
-            orient = mPieControlPanel.getOrientation();
-        }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            final int action = event.getAction();
-
-            if (!mPieControlPanel.isShowing()) {
-                switch(action) {
-                    case MotionEvent.ACTION_DOWN:
-                        centerPie = Settings.System.getInt(mContext.getContentResolver(), Settings.System.PIE_CENTER, 1) == 1;
-                        actionDown = true;
-                        initialX = event.getX();
-                        initialY = event.getY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        if (actionDown != true) break;
-
-                        float deltaX = Math.abs(event.getX() - initialX);
-                        float deltaY = Math.abs(event.getY() - initialY);
-                        float distance = orient == Gravity.BOTTOM ||
-                                orient == Gravity.TOP ? deltaY : deltaX;
-                        // Swipe up
-                        if (distance > 10) {
-                            orient = mPieControlPanel.getOrientation();
-                            mPieControlPanel.show(centerPie ? -1 : (int)(orient == Gravity.BOTTOM ||
-                                orient == Gravity.TOP ? initialX : initialY));
-                            event.setAction(MotionEvent.ACTION_DOWN);
-                            mPieControlPanel.onTouchEvent(event);
-                            actionDown = false;
-                        }
-                }
-            } else {
-                return mPieControlPanel.onTouchEvent(event);
-            }
-            return false;
-        }
-    }
-
     public void start() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -359,9 +239,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        mCurrentUIMode = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.CURRENT_UI_MODE,0);
 
         mShowNotificationCounts = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.STATUS_BAR_NOTIF_COUNT, 0) == 1;
@@ -382,10 +259,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
-        mTransparencyManager = new TransparencyManager(mContext);
+
         createAndAddWindows();
-        // create WidgetView
-        mWidgetView = new WidgetView(mContext,null);
+
         disable(switches[0]);
         setSystemUiVisibility(switches[1], 0xffffffff);
         topAppWindowChanged(switches[2] != 0);
@@ -439,125 +315,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                     if (true) Slog.v(TAG, "userId " + mCurrentUserId + " is in the house");
                     userSwitched(mCurrentUserId);
                 }
-            }}, filter);
-
-        // Listen for PIE gravity
-        mContext.getContentResolver().registerContentObserver(
-            Settings.System.getUriFor(Settings.System.PIE_GRAVITY), false, new ContentObserver(new Handler()) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    if (Settings.System.getInt(mContext.getContentResolver(),
-                            Settings.System.PIE_STICK, 1) == 0) {
-                        updatePieControls();
-                    }
-                }
-            });
-
-        attachPie();
-
-        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
-        settingsObserver.observe();
-    }
-
-    private boolean showPie() {
-        boolean pie = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.PIE_CONTROLS, 0) == 1;
-
-        return (pie);
-    }
-
-    public void updatePieControls() {
-        if (mPieControlsTrigger != null) mWindowManager.removeView(mPieControlsTrigger);
-        if (mPieControlPanel != null)  mWindowManager.removeView(mPieControlPanel);
-        attachPie();
-    }
-
-    private void attachPie() {
-        if(showPie()) {
-            if (mContainer == null) {
-                // Add panel window, one to be used by all pies that is
-                LayoutInflater inflater = (LayoutInflater) mContext
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-                mContainer = (PieExpandPanel)inflater.inflate(R.layout.pie_expanded_panel, null);
-                mContainer.init(mPile);
-                mWindowManager.addView(mContainer, PieStatusPanel.getFlipPanelLayoutParams());
             }
+        }, filter);
 
-            // Add pie (s), want some slice?
-            int gravity = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.PIE_GRAVITY, 3);
-
-            switch(gravity) {
-                case 0:
-                    addPieInLocation(Gravity.LEFT);
-                    break;
-                case 1:
-                    addPieInLocation(Gravity.TOP);
-                    break;
-                case 2:
-                    addPieInLocation(Gravity.RIGHT);
-                    break;
-                default:
-                    addPieInLocation(Gravity.BOTTOM);
-                    break;
-            }
-        } else {
-            mPieControlsTrigger = null;
-            mPieControlPanel = null;
+        if (PieManager.getInstance().isPresent()) {
+            mPieController = new PieController(mContext);
+            mPieController.attachStatusBar(this);
+            addNavigationBarCallback(mPieController);
         }
-    }
-
-    private void addPieInLocation(int gravity) {
-        // Quick navigation bar panel
-        PieControlPanel panel = (PieControlPanel) View.inflate(mContext,
-                R.layout.pie_control_panel, null);
-
-        // Quick navigation bar trigger area
-        View pieControlsTrigger = new View(mContext);
-
-        // Store our views for removing / adding
-        mPieControlPanel = panel;
-        mPieControlsTrigger = pieControlsTrigger;
-
-        pieControlsTrigger.setOnTouchListener(new PieControlsTouchListener());
-        mWindowManager.addView(pieControlsTrigger, getPieTriggerLayoutParams(mContext, gravity));
-
-        panel.init(mHandler, this, pieControlsTrigger, gravity);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                PixelFormat.TRANSLUCENT);
-        lp.setTitle("PieControlPanel");
-        lp.windowAnimations = android.R.style.Animation;
-
-        mWindowManager.addView(panel, lp);
-    }
-
-    public static WindowManager.LayoutParams getPieTriggerLayoutParams(Context context, int gravity) {
-        final Resources res = context.getResources();
-        final float mPieSize = Settings.System.getFloat(context.getContentResolver(),
-                Settings.System.PIE_TRIGGER, 1f);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-              (gravity == Gravity.TOP || gravity == Gravity.BOTTOM ?
-                    ViewGroup.LayoutParams.MATCH_PARENT : (int)(res.getDimensionPixelSize(R.dimen.pie_trigger_height)*mPieSize)),
-              (gravity == Gravity.LEFT || gravity == Gravity.RIGHT ?
-                    ViewGroup.LayoutParams.MATCH_PARENT : (int)(res.getDimensionPixelSize(R.dimen.pie_trigger_height)*mPieSize)),
-              WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                      WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                      | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                      | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                      | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-              PixelFormat.TRANSLUCENT);
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-        lp.gravity = gravity;
-        return lp;
     }
 
     public void userSwitched(int newUserId) {
@@ -670,14 +435,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
-    public void animateCollapsePanels(int flags) {
-        if (mPieControlPanel != null
-                && flags == CommandQueue.FLAG_EXCLUDE_NONE) {
-            mPieControlPanel.animateCollapsePanels();
-        }
-    }
-
-    @Override
     public void toggleRecentApps() {
         int msg = MSG_TOGGLE_RECENTS_PANEL;
         mHandler.removeMessages(msg);
@@ -729,20 +486,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Provide SearchPanel with a temporary parent to allow layout params to work.
         LinearLayout tmpRoot = new LinearLayout(mContext);
-        switch (mCurrentUIMode) {
-            case 0 :  // Phone Mode
-                mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_search_panel, tmpRoot, false);
-                break;
-            case 1 : // Tablet Mode
-                mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_search_panel_tablet, tmpRoot, false);
-                break;
-            case 2 : // Phablet Mode
-                mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_search_panel_phablet, tmpRoot, false);
-                break;    
-        }
+        mSearchPanelView = (SearchPanelView) LayoutInflater.from(mContext).inflate(
+                 R.layout.status_bar_search_panel, tmpRoot, false);
         mSearchPanelView.setOnTouchListener(
                  new TouchOutsideListener(MSG_CLOSE_SEARCH_PANEL, mSearchPanelView));
         mSearchPanelView.setVisibility(View.GONE);
@@ -963,16 +708,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Slog.d(TAG, "opening search panel");
-                 if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
+                 if (mSearchPanelView != null) {
                      mSearchPanelView.show(true, true);
                  }
                  break;
              case MSG_CLOSE_SEARCH_PANEL:
-                if (DEBUG) Slog.d(TAG, "closing search panel");
-                if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
-                    mSearchPanelView.show(false, true);
-                }
-                break;
+                 if (DEBUG) Slog.d(TAG, "closing search panel");
+                 if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
+                     mSearchPanelView.show(false, true);
+                 }
+                 break;
             }
         }
     }
@@ -1136,10 +881,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     // the stack trace isn't very helpful here.  Just log the exception message.
                     Slog.w(TAG, "Sending contentIntent failed: " + e);
                 }
-
-                KeyguardManager kgm =
-                    (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-                if (kgm != null) kgm.exitKeyguardSecurely(null);
             }
 
             try {
@@ -1280,12 +1021,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     }
-    // To be used to tell StatusBar to inflate NavBar/SystemBar
-    // boolean to launch NavRing at same time
-    protected abstract void showBar(boolean showSearch);
-    protected abstract void setSearchLightOn(boolean on);
-    // used to tell statusbar that NavBar/Systembar has been touched - in order to reset AutoHide Timer
-    protected abstract void onBarTouchEvent(MotionEvent ev);
+
     protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotificationIcons();
@@ -1455,5 +1191,45 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean inKeyguardRestrictedInputMode() {
         KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         return km.inKeyguardRestrictedInputMode();
+    }
+
+    public int getExpandedDesktopMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        boolean expanded = Settings.System.getInt(resolver,
+                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+        if (expanded) {
+            return Settings.System.getInt(resolver, Settings.System.EXPANDED_DESKTOP_STYLE, 0);
+        }
+        return 0;
+    }
+
+    public void addNavigationBarCallback(NavigationBarCallback callback) {
+        mNavigationCallbacks.add(callback);
+    }
+
+    protected void propagateNavigationIconHints(int hints) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setNavigationIconHints(hints);
+        }
+    }
+
+    protected void propagateMenuVisibility(boolean showMenu) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setMenuVisibility(showMenu);
+        }
+    }
+
+    protected void propagateDisabledFlags(int disabledFlags) {
+        for (NavigationBarCallback callback : mNavigationCallbacks) {
+            callback.setDisabledFlags(disabledFlags);
+        }
+    }
+
+    // Pie Controls
+
+    public void updatePieTriggerMask(int newMask) {
+        if (mPieController != null) {
+            mPieController.updatePieTriggerMask(newMask);
+        }
     }
 }

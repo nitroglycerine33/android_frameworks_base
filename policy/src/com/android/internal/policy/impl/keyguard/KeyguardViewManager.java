@@ -25,8 +25,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.media.AudioManager;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -125,15 +125,13 @@ public class KeyguardViewManager {
     private boolean shouldEnableScreenRotation() {
         Resources res = mContext.getResources();
         return SystemProperties.getBoolean("lockscreen.rot_override",false)
-                || Settings.System.getInt(
-                    mContext.getContentResolver(),
-                    Settings.System.LOCKSCREEN_AUTO_ROTATE,
-                    com.android.internal.R.bool.config_enableLockScreenRotation) == 1;
+                || res.getBoolean(com.android.internal.R.bool.config_enableLockScreenRotation);
     }
 
     class ViewManagerHost extends FrameLayout {
         public ViewManagerHost(Context context) {
             super(context);
+            setFitsSystemWindows(true);
         }
 
         @Override
@@ -220,6 +218,7 @@ public class KeyguardViewManager {
 
     public boolean handleKeyUp(int keyCode, KeyEvent event) {
         if (mUnlockKeyDown) {
+            mUnlockKeyDown = false;
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     if (mKeyguardView.handleBackKey()) {
@@ -338,7 +337,7 @@ public class KeyguardViewManager {
                     stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
             lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
-                lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
             if (isActivity) {

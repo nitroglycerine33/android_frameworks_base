@@ -56,11 +56,6 @@ public class KeyguardPINView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected boolean getQuickUnlockAllowed() {
-        return true;
-    }
-
-    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 

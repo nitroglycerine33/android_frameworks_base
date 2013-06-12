@@ -33,7 +33,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -75,7 +74,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
     // measured.
     private int mSmallWidgetHeight;
     private int mSmallFrameHeight;
-    private int mExtDesktopPadding;
     private boolean mWidgetLockedSmall = false;
     private int mMaxChallengeTop = -1;
     private int mFrameStrokeAdjustment;
@@ -112,9 +110,6 @@ public class KeyguardWidgetFrame extends FrameLayout {
         setPadding(padding, padding, padding, padding);
 
         mFrameStrokeAdjustment = 2 + (int) (2 * density);
-
-        mExtDesktopPadding =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height) * 2;
 
         // This will be overriden on phones based on the current security mode, however on tablets
         // we need to specify a height.
@@ -354,8 +349,7 @@ public class KeyguardWidgetFrame extends FrameLayout {
     public void setMaxChallengeTop(int top) {
         boolean dirty = mMaxChallengeTop != top;
         mMaxChallengeTop = top;
-        mSmallWidgetHeight = top - getPaddingTop() - (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1 ? mExtDesktopPadding : 0);
+        mSmallWidgetHeight = top - getPaddingTop();
         mSmallFrameHeight = top + getPaddingBottom();
         if (dirty && mIsSmall) {
             setWidgetHeight(mSmallWidgetHeight);
