@@ -27,6 +27,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Gravity;
@@ -607,7 +608,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             if (i != mCurrentPage) {
-                child.setBackgroundAlpha(KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
+                if (Settings.System.getInt(mContext.getContentResolver(),
+			Settings.System.LOCKSCREEN_HIDE_HINTS, 0) == 0) {
+		    child.setBackgroundAlpha(KeyguardWidgetFrame.OUTLINE_ALPHA_MULTIPLIER);
+		}
                 child.setContentAlpha(0f);
             } else {
                 child.setBackgroundAlpha(0f);
