@@ -1370,8 +1370,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean keyRebindingEnabled = Settings.System.getInt(resolver,
                     Settings.System.HARDWARE_KEY_REBINDING, 0) == 1;
 
-            mHasMenuKeyEnabled = false;
-
             if (!keyRebindingEnabled) {
                 if (mHasHomeKey) {
                     if (mHasAppSwitchKey) {
