@@ -2754,6 +2754,12 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_HIDE_HINTS = "lockscreen_hide_hints";
 
+        /**
+         * Whether to wake the screen with the home key, the value is boolean.
+         * @hide
+         */
+        public static final String HOME_WAKE_SCREEN = "home_wake_screen";
+
 	/**
          * @hide
          */
