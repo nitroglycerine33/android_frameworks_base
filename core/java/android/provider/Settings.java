@@ -2783,6 +2783,12 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_BAR_ANIMATE = "statusbar_battery_bar_animate";
 
         /**
+         * Show/Hide battery text %
+         * @hide
+         */
+        public static final String BATTERY_TEXT = "battery_text";
+
+        /**
          * Whether to wake the screen with the home key, the value is boolean.
          * @hide
          */
