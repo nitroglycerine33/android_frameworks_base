@@ -219,10 +219,6 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
-    public String getStatusBarSlot() {
-        return mSlot;
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);

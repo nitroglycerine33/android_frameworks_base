@@ -25,7 +25,6 @@ import com.android.server.wm.WindowManagerService;
 import android.graphics.Point;
 import android.util.Slog;
 import android.view.Display;
-import android.os.SystemProperties;
 
 /**
  * Activity manager code dealing with processes.
@@ -102,7 +101,7 @@ class ProcessList {
     // The maximum number of hidden processes we will keep around before
     // killing them; this is just a control to not let us go too crazy with
     // keeping around processes on devices with large amounts of RAM.
-    static final int MAX_HIDDEN_APPS = SystemProperties.getInt("ro.sys.fw.bg_apps_limit", 24);
+    static final int MAX_HIDDEN_APPS = 24;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
@@ -140,7 +139,7 @@ class ProcessList {
     // HVGA or smaller phone with less than 512MB.  Values are in KB.
     private final long[] mOomMinFreeLow = new long[] {
             8192, 12288, 16384,
-            32768, 40960, 65536
+            24576, 28672, 32768
     };
     // These are the high-end OOM level limits.  This is appropriate for a
     // 1280x800 or larger screen with around 1GB RAM.  Values are in KB.

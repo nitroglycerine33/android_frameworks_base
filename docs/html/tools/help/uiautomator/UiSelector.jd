@@ -5,10 +5,40 @@ parent.link=index.html
 <style>
     h4.jd-details-title {background-color: #DEE8F1;}
 </style>
-<p>Specifies the elements in the layout hierarchy for tests to target, filtered
-by properties such as text value, content-description, class name, and state
-information. You can also target an element by its location in a layout
-hierarchy.</p>
+
+
+<h2>Class Overview</h2>
+<p>This class provides the mechanism for tests to describe the UI elements they
+ intend to target. A UI element has many properties associated with it such as
+ text value, content-description, class name and multiple state information like
+ selected, enabled, checked etc. Additionally UiSelector allows targeting of UI
+ elements within a specific display hierarchies to distinguish similar elements
+ based in the hierarchies they're in.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
 <h2>Summary</h2>
 
 
@@ -38,19 +68,19 @@ hierarchy.</p>
 
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            </nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#UiSelector()">UiSelector</a></span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#UiSelector()">UiSelector</a></span>()
+        
   </td></tr>
 
 
@@ -67,542 +97,486 @@ hierarchy.</p>
 
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#checkable(boolean)">checkable</a></span>(boolean val)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match widgets that are checkable.</div>
-
-  </td></tr>
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#checked(boolean)">checked</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#checked(boolean)">checked</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that
  are currently checked (usually for checkboxes).</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#childSelector(com.android.uiautomator.core.UiSelector)">childSelector</a></span>(<a href="#">UiSelector</a> selector)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#childSelector(com.android.uiautomator.core.UiSelector)">childSelector</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
+        
         <div class="jd-descrdiv">Adds a child UiSelector criteria to this selector.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#className(java.lang.String)">className</a></span>(String className)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#className(java.lang.String)">className</a></span>(String className)
+        
         <div class="jd-descrdiv">Set the search criteria to match the class property
  for a widget (for example, "android.widget.Button").</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
             &lt;T&gt;
-            <a href="#">UiSelector</a></nobr>
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#className(java.lang.Class<T>)">className</a></span>(Class&lt;T&gt; type)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#className(java.lang.Class<T>)">className</a></span>(Class&lt;T&gt; type)
+        
         <div class="jd-descrdiv">Set the search criteria to match the class property
  for a widget (for example, "android.widget.Button").</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#classNameMatches(java.lang.String)">classNameMatches</a></span>(String regex)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#classNameMatches(java.lang.String)">classNameMatches</a></span>(String regex)
+        
         <div class="jd-descrdiv">Set the search criteria to match the class property
- for a widget, using a regular expression.</div>
-
+ for a widget (for example, "android.widget.Button").</div>
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#clickable(boolean)">clickable</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#clickable(boolean)">clickable</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that are clickable.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#description(java.lang.String)">description</a></span>(String desc)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#description(java.lang.String)">description</a></span>(String desc)
+        
         <div class="jd-descrdiv">Set the search criteria to match the content-description
  property for a widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#descriptionContains(java.lang.String)">descriptionContains</a></span>(String desc)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#descriptionContains(java.lang.String)">descriptionContains</a></span>(String desc)
+        
         <div class="jd-descrdiv">Set the search criteria to match the content-description
  property for a widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#descriptionMatches(java.lang.String)">descriptionMatches</a></span>(String regex)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#descriptionMatches(java.lang.String)">descriptionMatches</a></span>(String regex)
+        
         <div class="jd-descrdiv">Set the search criteria to match the content-description
  property for a widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#descriptionStartsWith(java.lang.String)">descriptionStartsWith</a></span>(String desc)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#descriptionStartsWith(java.lang.String)">descriptionStartsWith</a></span>(String desc)
+        
         <div class="jd-descrdiv">Set the search criteria to match the content-description
  property for a widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#enabled(boolean)">enabled</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#enabled(boolean)">enabled</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that are enabled.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#focusable(boolean)">focusable</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#focusable(boolean)">focusable</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that are focusable.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#focused(boolean)">focused</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#focused(boolean)">focused</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that have focus.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#fromParent(com.android.uiautomator.core.UiSelector)">fromParent</a></span>(<a href="#">UiSelector</a> selector)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#fromParent(com.android.uiautomator.core.UiSelector)">fromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
+        
         <div class="jd-descrdiv">Adds a child UiSelector criteria to this selector which is used to
  start search from the parent widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#index(int)">index</a></span>(int index)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#index(int)">index</a></span>(int index)
+        
         <div class="jd-descrdiv">Set the search criteria to match the widget by its node
  index in the layout hierarchy.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#instance(int)">instance</a></span>(int instance)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#instance(int)">instance</a></span>(int instance)
+        
         <div class="jd-descrdiv">Set the search criteria to match the
  widget by its instance number.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#longClickable(boolean)">longClickable</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#longClickable(boolean)">longClickable</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that are long-clickable.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#packageName(java.lang.String)">packageName</a></span>(String name)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#packageName(java.lang.String)">packageName</a></span>(String name)
+        
         <div class="jd-descrdiv">Set the search criteria to match the package name
  of the application that contains the widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#packageNameMatches(java.lang.String)">packageNameMatches</a></span>(String regex)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#packageNameMatches(java.lang.String)">packageNameMatches</a></span>(String regex)
+        
         <div class="jd-descrdiv">Set the search criteria to match the package name
  of the application that contains the widget.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#resourceId(java.lang.String)">resourceId</a></span>(String id)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match the given resource ID.</div>
-
-  </td></tr>
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#resourceIdMatches(java.lang.String)">resourceIdMatches</a></span>(String regex)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match the resource ID
- of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/</div>
-
-  </td></tr>
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#scrollable(boolean)">scrollable</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#scrollable(boolean)">scrollable</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that are scrollable.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#selected(boolean)">selected</a></span>(boolean val)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#selected(boolean)">selected</a></span>(boolean val)
+        
         <div class="jd-descrdiv">Set the search criteria to match widgets that
  are currently selected.</div>
-
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#text(java.lang.String)">text</a></span>(String text)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#text(java.lang.String)">text</a></span>(String text)
+        
         <div class="jd-descrdiv">Set the search criteria to match the visible text displayed
- in a widget (for example, the text label to launch an app).</div>
-
+ for a widget (for example, the text label to launch an app).</div>
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#textContains(java.lang.String)">textContains</a></span>(String text)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match the visible text in a widget
- where the visible text must contain the string in your input argument.</div>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#textContains(java.lang.String)">textContains</a></span>(String text)
+        
+        <div class="jd-descrdiv">Set the search criteria to match the visible text displayed
+ for a widget (for example, the text label to launch an app).</div>
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#textMatches(java.lang.String)">textMatches</a></span>(String regex)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match the visible text displayed in a layout
- element, using a regular expression.</div>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#textMatches(java.lang.String)">textMatches</a></span>(String regex)
+        
+        <div class="jd-descrdiv">Set the search criteria to match the visible text displayed
+ for a widget (for example, the text label to launch an app).</div>
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            <a href="UiSelector.html">UiSelector</a>
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#textStartsWith(java.lang.String)">textStartsWith</a></span>(String text)</nobr>
-
-        <div class="jd-descrdiv">Set the search criteria to match visible text in a widget that is
- prefixed by the text parameter.</div>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#textStartsWith(java.lang.String)">textStartsWith</a></span>(String text)
+        
+        <div class="jd-descrdiv">Text property is usually the widget's visible text on the display.</div>
+  
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            String</nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#toString()">toString</a></span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad"><a href="#toString()">toString</a></span>()
+        
   </td></tr>
 
 
@@ -610,31 +584,6 @@ hierarchy.</p>
 </table>
 
 
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
-
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="#">UiSelector</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="#cloneSelector()">cloneSelector</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-</table>
 
 
 
@@ -646,7 +595,7 @@ hierarchy.</p>
   <div style="clear:left;">Inherited Methods</div></th></tr>
 
 
-<tr class="api" >
+<tr class="api apilevel-" >
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
@@ -662,182 +611,150 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            Object</nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            boolean
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clone</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">equals</span>(Object arg0)
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            Class&lt;?&gt;</nobr>
+            
+            
+            Class&lt;?&gt;
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getClass</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">getClass</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            int</nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            int
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">hashCode</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">hashCode</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            void</nobr>
+            
+            
+            void
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notify</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notify</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            void</nobr>
+            
+            
+            void
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyAll</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">notifyAll</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            String</nobr>
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
+            
+            
+            
+            String
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">toString</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">toString</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            void</nobr>
+            
+            
+            void
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>()</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>()
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            void</nobr>
+            
+            
+            void
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0, int arg1)
+        
   </td></tr>
 
 
-
-    <tr class="api" >
-        <td class="jd-typecol"><nobr>
-
-
+	 
+    <tr class="api">
+        <td class="jd-typecol">
+            
+            
             final
-
-
-            void</nobr>
+            
+            
+            void
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0)</nobr>
-
+        <td class="jd-linkcol" width="100%">
+        <span class="sympad">wait</span>(long arg0)
+        
   </td></tr>
 
 
@@ -881,29 +798,31 @@ From class
 
 
 
-<A NAME="UiSelector()"></A>
+<a id="UiSelector()"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">UiSelector</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -925,76 +844,31 @@ From class
 
 
 
-<A NAME="checkable(boolean)"></A>
+<a id="checked(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
-      </span>
-      <span class="sympad">checkable</span>
-      <span class="normal">(boolean val)</span>
-    </h4>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are checkable.
-
- Typically, using this search criteria alone is not useful.
- You should also include additional criteria, such as text,
- content-description, or the class name for a widget.
-
- If no other search criteria is specified, and there is more
- than one matching widget, the first widget in the tree
- is selected.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>val</td>
-          <td>Value to match</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
-  </div>
-  <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 18</li></ul>
-  </div>
-    </div>
-</div>
-
-
-<A NAME="checked(boolean)"></A>
-
-<div class="jd-details api">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">checked</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that
  are currently checked (usually for checkboxes).
 
@@ -1009,7 +883,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1023,29 +897,31 @@ From class
 </div>
 
 
-<A NAME="childSelector(com.android.uiautomator.core.UiSelector)"></A>
+<a id="childSelector(com.android.uiautomator.core.UiSelector)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">childSelector</span>
-      <span class="normal">(<a href="#">UiSelector</a> selector)</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Adds a child UiSelector criteria to this selector.
 
  Use this selector to narrow the search scope to
@@ -1059,30 +935,38 @@ From class
 </div>
 
 
-<A NAME="className(java.lang.String)"></A>
+<a id="className(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">className</span>
       <span class="normal">(String className)</span>
     </h4>
-    <div class="jd-details-descr">
+      <div class="api-level">
+        <div>
 
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the class property
  for a widget (for example, "android.widget.Button").</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>className</td>
+          <th>className</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1091,120 +975,114 @@ From class
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
-  <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+
     </div>
 </div>
 
 
-<A NAME="className(java.lang.Class<T>)"></A>
+<a id="className(java.lang.Class<T>)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">className</span>
       <span class="normal">(Class&lt;T&gt; type)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the class property
  for a widget (for example, "android.widget.Button").</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>type</td>
-          <td>type</td>
-        </tr>
-      </table>
-  </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
-
+  <div class="jd-tagdata">
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="classNameMatches(java.lang.String)"></A>
+<a id="classNameMatches(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">classNameMatches</span>
       <span class="normal">(String regex)</span>
     </h4>
-    <div class="jd-details-descr">
+      <div class="api-level">
+        <div>
 
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the class property
- for a widget, using a regular expression.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>regex</td>
-          <td>a regular expression</td>
-        </tr>
-      </table>
-  </div>
+ for a widget (for example, "android.widget.Button").</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
   <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="clickable(boolean)"></A>
+<a id="clickable(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">clickable</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are clickable.
 
  Typically, using this search criteria alone is not useful.
@@ -1218,7 +1096,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1232,29 +1110,31 @@ From class
 </div>
 
 
-<A NAME="description(java.lang.String)"></A>
+<a id="description(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">description</span>
       <span class="normal">(String desc)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the content-description
  property for a widget.
 
@@ -1270,7 +1150,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>desc</td>
+          <th>desc</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1284,29 +1164,31 @@ From class
 </div>
 
 
-<A NAME="descriptionContains(java.lang.String)"></A>
+<a id="descriptionContains(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">descriptionContains</span>
       <span class="normal">(String desc)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the content-description
  property for a widget.
 
@@ -1322,7 +1204,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>desc</td>
+          <th>desc</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1336,23 +1218,31 @@ From class
 </div>
 
 
-<A NAME="descriptionMatches(java.lang.String)"></A>
+<a id="descriptionMatches(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">descriptionMatches</span>
       <span class="normal">(String regex)</span>
     </h4>
-    <div class="jd-details-descr">
+      <div class="api-level">
+        <div>
 
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the content-description
  property for a widget.
 
@@ -1363,49 +1253,42 @@ From class
  for the widget must match exactly
  with the string in your input argument.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>regex</td>
-          <td>a regular expression</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
   <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="descriptionStartsWith(java.lang.String)"></A>
+<a id="descriptionStartsWith(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">descriptionStartsWith</span>
       <span class="normal">(String desc)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the content-description
  property for a widget.
 
@@ -1421,7 +1304,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>desc</td>
+          <th>desc</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1435,29 +1318,31 @@ From class
 </div>
 
 
-<A NAME="enabled(boolean)"></A>
+<a id="enabled(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">enabled</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are enabled.
 
  Typically, using this search criteria alone is not useful.
@@ -1471,7 +1356,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1485,29 +1370,31 @@ From class
 </div>
 
 
-<A NAME="focusable(boolean)"></A>
+<a id="focusable(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">focusable</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are focusable.
 
  Typically, using this search criteria alone is not useful.
@@ -1521,7 +1408,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1535,29 +1422,31 @@ From class
 </div>
 
 
-<A NAME="focused(boolean)"></A>
+<a id="focused(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">focused</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that have focus.
 
  Typically, using this search criteria alone is not useful.
@@ -1571,7 +1460,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1585,29 +1474,31 @@ From class
 </div>
 
 
-<A NAME="fromParent(com.android.uiautomator.core.UiSelector)"></A>
+<a id="fromParent(com.android.uiautomator.core.UiSelector)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">fromParent</span>
-      <span class="normal">(<a href="#">UiSelector</a> selector)</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Adds a child UiSelector criteria to this selector which is used to
  start search from the parent widget.
 
@@ -1622,29 +1513,31 @@ From class
 </div>
 
 
-<A NAME="index(int)"></A>
+<a id="index(int)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">index</span>
       <span class="normal">(int index)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the widget by its node
  index in the layout hierarchy.
 
@@ -1657,7 +1550,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>index</td>
+          <th>index</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1671,29 +1564,31 @@ From class
 </div>
 
 
-<A NAME="instance(int)"></A>
+<a id="instance(int)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">instance</span>
       <span class="normal">(int instance)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the
  widget by its instance number.
 
@@ -1714,7 +1609,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>instance</td>
+          <th>instance</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1728,23 +1623,31 @@ From class
 </div>
 
 
-<A NAME="longClickable(boolean)"></A>
+<a id="longClickable(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">longClickable</span>
       <span class="normal">(boolean val)</span>
     </h4>
-    <div class="jd-details-descr">
+      <div class="api-level">
+        <div>
 
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are long-clickable.
 
  Typically, using this search criteria alone is not useful.
@@ -1758,7 +1661,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1768,43 +1671,45 @@ From class
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
   <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="packageName(java.lang.String)"></A>
+<a id="packageName(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">packageName</span>
       <span class="normal">(String name)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the package name
  of the application that contains the widget.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>name</td>
+          <th>name</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1818,148 +1723,70 @@ From class
 </div>
 
 
-<A NAME="packageNameMatches(java.lang.String)"></A>
+<a id="packageNameMatches(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">packageNameMatches</span>
       <span class="normal">(String regex)</span>
     </h4>
-    <div class="jd-details-descr">
+      <div class="api-level">
+        <div>
 
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the package name
  of the application that contains the widget.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>regex</td>
-          <td>a regular expression</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
   <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="resourceId(java.lang.String)"></A>
+<a id="scrollable(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
-      </span>
-      <span class="sympad">resourceId</span>
-      <span class="normal">(String id)</span>
-    </h4>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the given resource ID.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>id</td>
-          <td>Value to match</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
-  </div>
-  <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 18</li></ul>
-  </div>
-    </div>
-</div>
-
-
-<A NAME="resourceIdMatches(java.lang.String)"></A>
-
-<div class="jd-details api">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
-      </span>
-      <span class="sympad">resourceIdMatches</span>
-      <span class="normal">(String regex)</span>
-    </h4>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the resource ID
- of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>regex</td>
-          <td>a regular expression</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
-  </div>
-  <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 18</li></ul>
-  </div>
-    </div>
-</div>
-
-
-<A NAME="scrollable(boolean)"></A>
-
-<div class="jd-details api">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">scrollable</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that are scrollable.
 
  Typically, using this search criteria alone is not useful.
@@ -1973,7 +1800,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -1987,29 +1814,31 @@ From class
 </div>
 
 
-<A NAME="selected(boolean)"></A>
+<a id="selected(boolean)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">selected</span>
       <span class="normal">(boolean val)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match widgets that
  are currently selected.
 
@@ -2024,7 +1853,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>val</td>
+          <th>val</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -2038,39 +1867,42 @@ From class
 </div>
 
 
-<A NAME="text(java.lang.String)"></A>
+<a id="text(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">text</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the visible text displayed
- in a widget (for example, the text label to launch an app).
+ for a widget (for example, the text label to launch an app).
 
- The text for the element must match exactly with the string in your input
- argument. Matching is case-sensitive.</p></div>
+ The text for the widget must match exactly
+ with the string in your input argument.
+ Matching is case-sensitive.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>text</td>
+          <th>text</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -2084,38 +1916,41 @@ From class
 </div>
 
 
-<A NAME="textContains(java.lang.String)"></A>
+<a id="textContains(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">textContains</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the visible text displayed
+ for a widget (for example, the text label to launch an app).
 
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the visible text in a widget
- where the visible text must contain the string in your input argument.
-
- The matching is case-sensitive.</p></div>
+ The text for the widget must contain the string in
+ your input argument. Matching is case-sensitive.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>text</td>
+          <th>text</th>
           <td>Value to match</td>
         </tr>
       </table>
@@ -2129,117 +1964,113 @@ From class
 </div>
 
 
-<A NAME="textMatches(java.lang.String)"></A>
+<a id="textMatches(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">textMatches</span>
       <span class="normal">(String regex)</span>
     </h4>
+      <div class="api-level">
+        <div>
+
+</div>
+        
+  
+
+      </div>
     <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the visible text displayed
+ for a widget (for example, the text label to launch an app).
 
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the visible text displayed in a layout
- element, using a regular expression.
-
- The text in the widget must match exactly with the string in your
- input argument.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>regex</td>
-          <td>a regular expression</td>
-        </tr>
-      </table>
-  </div>
+ The text for the widget must match exactly
+ with the string in your input argument.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
   </div>
   <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
+  <h5 class="jd-tagtitle">Since</h5>
+  <ul class="nolist"><li>Android API Level 17</li></ul>
+</div>
     </div>
 </div>
 
 
-<A NAME="textStartsWith(java.lang.String)"></A>
+<a id="textStartsWith(java.lang.String)"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-        <a href="#">UiSelector</a>
+        public 
+         
+         
+         
+         
+        <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">textStartsWith</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Text property is usually the widget's visible text on the display.
 
-  <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match visible text in a widget that is
- prefixed by the text parameter.
+ Adding this to the search criteria indicates that the search performed
+ should match a widget with text value starting with the text parameter.
 
- The matching is case-insensitive.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>text</td>
-          <td>Value to match</td>
-        </tr>
-      </table>
-  </div>
+ The matching will be case-insensitive.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>UiSelector with the specified search criteria</li></ul>
+      <ul class="nolist"><li>UiSelector with this added search criterion</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<A NAME="toString()"></A>
+<a id="toString()"></a>
 
-<div class="jd-details api">
+<div class="jd-details api "> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">toString</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div></div>
+        <div>
 
-
+</div>
+        
+  
 
       </div>
     <div class="jd-details-descr">
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2251,36 +2082,7 @@ From class
 
 <!-- ========= METHOD DETAIL ======== -->
 
-<h2>Protected Methods</h2>
 
 
-
-<A NAME="cloneSelector()"></A>
-
-<div class="jd-details api">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        protected
-
-
-
-
-        <a href="#">UiSelector</a>
-      </span>
-      <span class="sympad">cloneSelector</span>
-      <span class="normal">()</span>
-    </h4>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata">
-     <h5 class="jd-tagtitle">Since</h5>
-     <ul class="nolist"><li>Android API Level 17</li></ul>
-  </div>
-
-    </div>
-
-
-
-
-
+<!-- ========= END OF CLASS DATA ========= -->
 

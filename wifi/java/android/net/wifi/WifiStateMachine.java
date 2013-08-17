@@ -67,8 +67,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.util.LruCache;
 import android.text.TextUtils;
+import android.util.LruCache;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
@@ -110,7 +110,6 @@ public class WifiStateMachine extends StateMachine {
     private ConnectivityManager mCm;
 
     private final boolean mP2pSupported;
-    private boolean mIbssSupported;
     private final AtomicBoolean mP2pConnected = new AtomicBoolean(false);
     private boolean mTemporarilyDisconnectWifi = false;
     private final String mPrimaryDeviceType;
@@ -152,8 +151,6 @@ public class WifiStateMachine extends StateMachine {
     private boolean mBluetoothConnectionActive = false;
 
     private PowerManager.WakeLock mSuspendWakeLock;
-
-    private List<WifiChannel> mSupportedChannels;
 
     /**
      * Interval in milliseconds between polling for RSSI
@@ -214,9 +211,6 @@ public class WifiStateMachine extends StateMachine {
 
     /* Tracks current frequency mode */
     private AtomicInteger mFrequencyBand = new AtomicInteger(WifiManager.WIFI_FREQUENCY_BAND_AUTO);
-
-    /* Tracks current country code */
-    private String mCountryCode = "GB";
 
     /* Tracks if we are filtering Multicast v4 packets. Default is to filter. */
     private AtomicBoolean mFilteringMulticastV4Packets = new AtomicBoolean(true);
@@ -355,13 +349,7 @@ public class WifiStateMachine extends StateMachine {
     public static final int CMD_DISABLE_P2P_REQ           = BASE + 132;
     public static final int CMD_DISABLE_P2P_RSP           = BASE + 133;
 
-    /* Is IBSS mode supported by the driver? */
-    public static final int CMD_GET_IBSS_SUPPORTED        = BASE + 134;
-
-    /* Get supported channels */
-    public static final int CMD_GET_SUPPORTED_CHANNELS    = BASE + 135;
-
-    public static final int CMD_BOOT_COMPLETED            = BASE + 136;
+    public static final int CMD_BOOT_COMPLETED            = BASE + 134;
 
     public static final int CONNECT_MODE                   = 1;
     public static final int SCAN_ONLY_MODE                 = 2;
@@ -1072,27 +1060,6 @@ public class WifiStateMachine extends StateMachine {
     }
 
     /**
-     * Returns the operational country code
-     */
-    public String getCountryCode() {
-        return mCountryCode;
-    }
-
-    public int syncIsIbssSupported(AsyncChannel channel) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_GET_IBSS_SUPPORTED);
-        int result = resultMsg.arg1;
-        resultMsg.recycle();
-        return result;
-    }
-
-    public List<WifiChannel> syncGetSupportedChannels(AsyncChannel channel) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_GET_SUPPORTED_CHANNELS);
-        List<WifiChannel> result = (List<WifiChannel>) resultMsg.obj;
-        resultMsg.recycle();
-        return result;
-    }
-
-    /**
      * Set the operational frequency band
      * @param band
      * @param persist {@code true} if the setting should be remembered.
@@ -1316,15 +1283,7 @@ public class WifiStateMachine extends StateMachine {
         if (countryCode != null && !countryCode.isEmpty()) {
             setCountryCode(countryCode, false);
         } else {
-            // On wifi-only devices, some drivers don't find hidden SSIDs unless DRIVER COUNTRY
-            // is called. Use the default country code to ping the driver.
-            ConnectivityManager cm =
-                    (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (!cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                setCountryCode(mCountryCode, false);
-            }
-
-            // In other case, mcc tables from carrier do the trick of starting up the wifi driver
+            //use driver default
         }
     }
 
@@ -1410,7 +1369,6 @@ public class WifiStateMachine extends StateMachine {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private static final String ID_STR = "id=";
     private static final String BSSID_STR = "bssid=";
     private static final String FREQ_STR = "freq=";
     private static final String LEVEL_STR = "level=";
@@ -1422,8 +1380,6 @@ public class WifiStateMachine extends StateMachine {
 
     /**
      * Format:
-     *
-     * id=1
      * bssid=68:7f:76:d7:1a:6e
      * freq=2412
      * level=-44
@@ -1431,7 +1387,6 @@ public class WifiStateMachine extends StateMachine {
      * flags=[WPA2-PSK-CCMP][WPS][ESS]
      * ssid=zfdy
      * ====
-     * id=2
      * bssid=68:5f:74:d7:1a:6f
      * freq=5180
      * level=-73
@@ -1440,43 +1395,16 @@ public class WifiStateMachine extends StateMachine {
      * ssid=zuby
      * ====
      */
-    private void setScanResults() {
+    private void setScanResults(String scanResults) {
         String bssid = "";
         int level = 0;
         int freq = 0;
         long tsf = 0;
         String flags = "";
         WifiSsid wifiSsid = null;
-        String scanResults;
-        String tmpResults;
-        StringBuffer scanResultsBuf = new StringBuffer();
-        int sid = 0;
 
-        while (true) {
-            tmpResults = mWifiNative.scanResults(sid);
-            if (TextUtils.isEmpty(tmpResults)) break;
-            scanResultsBuf.append(tmpResults);
-            scanResultsBuf.append("\n");
-            String[] lines = tmpResults.split("\n");
-            sid = -1;
-            for (int i=lines.length - 1; i >= 0; i--) {
-                if (lines[i].startsWith(END_STR)) {
-                    break;
-                } else if (lines[i].startsWith(ID_STR)) {
-                    try {
-                        sid = Integer.parseInt(lines[i].substring(ID_STR.length())) + 1;
-                    } catch (NumberFormatException e) {
-                        // Nothing to do
-                    }
-                    break;
-                }
-            }
-            if (sid == -1) break;
-        }
-
-        scanResults = scanResultsBuf.toString();
-        if (TextUtils.isEmpty(scanResults)) {
-           return;
+        if (scanResults == null) {
+            return;
         }
 
         synchronized(mScanResultCache) {
@@ -1814,14 +1742,6 @@ public class WifiStateMachine extends StateMachine {
         // TODO: Remove this comment when the driver is fixed.
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
         mWifiNative.setPowerSave(false);
-
-        /* P2p discovery breaks dhcp, shut it down in order to get through this */
-        Message msg = new Message();
-        msg.what = WifiP2pService.BLOCK_DISCOVERY;
-        msg.arg1 = WifiP2pService.ENABLED;
-        msg.arg2 = DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE;
-        msg.obj = mDhcpStateMachine;
-        mWifiP2pChannel.sendMessage(msg);
     }
 
 
@@ -1847,8 +1767,6 @@ public class WifiStateMachine extends StateMachine {
         /* Restore power save and suspend optimizations */
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
         mWifiNative.setPowerSave(true);
-
-        mWifiP2pChannel.sendMessage(WifiP2pService.BLOCK_DISCOVERY, WifiP2pService.DISABLED);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -1971,11 +1889,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ADD_OR_UPDATE_NETWORK:
                 case CMD_REMOVE_NETWORK:
                 case CMD_SAVE_CONFIG:
-                case CMD_GET_IBSS_SUPPORTED:
                     replyToMessage(message, message.what, FAILURE);
-                    break;
-                case CMD_GET_SUPPORTED_CHANNELS:
-                    replyToMessage(message, message.what, (List<WifiChannel>) null);
                     break;
                 case CMD_GET_CONFIGURED_NETWORKS:
                     replyToMessage(message, message.what, (List<WifiConfiguration>) null);
@@ -2032,7 +1946,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                 case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
-                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
                 case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_BLACKLIST_NETWORK:
                 case CMD_CLEAR_BLACKLIST:
@@ -2243,9 +2156,6 @@ public class WifiStateMachine extends StateMachine {
                     mWifiConfigStore.loadAndEnableAllNetworks();
                     initializeWpsDetails();
 
-                    mIbssSupported = mWifiNative.getModeCapability("IBSS");
-                    mSupportedChannels = mWifiNative.getSupportedChannels();
-
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
                     break;
@@ -2274,8 +2184,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                case CMD_GET_IBSS_SUPPORTED:
-                case CMD_GET_SUPPORTED_CHANNELS:
                     deferMessage(message);
                     break;
                 default:
@@ -2323,7 +2231,7 @@ public class WifiStateMachine extends StateMachine {
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
-                    setScanResults();
+                    setScanResults(mWifiNative.scanResults());
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
                     break;
@@ -2338,10 +2246,6 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_SET_OPERATIONAL_MODE:
                     mOperationalMode = message.arg1;
-                    break;
-                case CMD_GET_IBSS_SUPPORTED:
-                case CMD_GET_SUPPORTED_CHANNELS:
-                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2459,7 +2363,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
-                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
                 case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
@@ -2551,12 +2454,9 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
-                    String countryCode = country != null ? country.toUpperCase() : null;
-                    if (DBG) log("set country code " + countryCode);
-                    if (mWifiNative.setCountryCode(countryCode)) {
-                        mCountryCode = countryCode;
-                    } else {
-                        loge("Failed to set country code " + countryCode);
+                    if (DBG) log("set country code " + country);
+                    if (!mWifiNative.setCountryCode(country.toUpperCase())) {
+                        loge("Failed to set country code " + country);
                     }
                     break;
                 case CMD_SET_FREQUENCY_BAND:
@@ -2659,12 +2559,6 @@ public class WifiStateMachine extends StateMachine {
                     } else {
                         setSuspendOptimizationsNative(SUSPEND_DUE_TO_HIGH_PERF, true);
                     }
-                    break;
-                case CMD_GET_IBSS_SUPPORTED:
-                    replyToMessage(message, message.what, mIbssSupported ? 1 : 0);
-                    break;
-                case CMD_GET_SUPPORTED_CHANNELS:
-                    replyToMessage(message, message.what, mSupportedChannels);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2848,9 +2742,6 @@ public class WifiStateMachine extends StateMachine {
             WifiConfiguration config;
             boolean ok;
             switch(message.what) {
-                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
-                    mSupplicantStateTracker.sendMessage(WifiMonitor.ASSOCIATION_REJECTION_EVENT);
-                    break;
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     mSupplicantStateTracker.sendMessage(WifiMonitor.AUTHENTICATION_FAILURE_EVENT);
                     break;
@@ -3066,6 +2957,7 @@ public class WifiStateMachine extends StateMachine {
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                   handlePreDhcpSetup();
+                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
                   break;
               case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                   handlePostDhcpSetup();
@@ -3579,9 +3471,6 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     if (DBG) log("Network connection lost");
                     handleNetworkDisconnect();
-                    break;
-                case WifiMonitor.ASSOCIATION_REJECTION_EVENT:
-                    if (DBG) log("Ignore Assoc reject event during WPS Connection");
                     break;
                 case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     // Disregard auth failure events during WPS connection. The

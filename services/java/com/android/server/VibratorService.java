@@ -45,7 +45,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -179,29 +178,6 @@ public class VibratorService extends IVibratorService.Stub
         return doVibratorExists();
     }
 
-    private boolean inQuietHours() {
-        boolean quietHoursEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.QUIET_HOURS_ENABLED, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
-        int quietHoursStart = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.QUIET_HOURS_START, 0, UserHandle.USER_CURRENT_OR_SELF);
-        int quietHoursEnd = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.QUIET_HOURS_END, 0, UserHandle.USER_CURRENT_OR_SELF);
-        boolean quietHoursHaptic = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.QUIET_HOURS_HAPTIC, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
-        if (quietHoursEnabled && quietHoursHaptic && (quietHoursStart != quietHoursEnd)) {
-            // Get the date in "quiet hours" format.
-            Calendar calendar = Calendar.getInstance();
-            int minutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
-            if (quietHoursEnd < quietHoursStart) {
-                // Starts at night, ends in the morning.
-                return (minutes > quietHoursStart) || (minutes < quietHoursEnd);
-            } else {
-                return (minutes > quietHoursStart) && (minutes < quietHoursEnd);
-            }
-        }
-        return false;
-    }
-
     private void verifyIncomingUid(int uid) {
         if (uid == Binder.getCallingUid()) {
             return;
@@ -223,7 +199,7 @@ public class VibratorService extends IVibratorService.Stub
         // timeout of 0 or negative. This will ensure that a vibration has
         // either a timeout of > 0 or a non-null pattern.
         if (milliseconds <= 0 || (mCurrentVibration != null
-                && mCurrentVibration.hasLongerTimeout(milliseconds)) || inQuietHours()) {
+                && mCurrentVibration.hasLongerTimeout(milliseconds))) {
             // Ignore this vibration since the current vibration will play for
             // longer than milliseconds.
             return;
@@ -259,9 +235,6 @@ public class VibratorService extends IVibratorService.Stub
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
-        }
-        if (inQuietHours()) {
-            return;
         }
         verifyIncomingUid(uid);
         // so wakelock calls will succeed

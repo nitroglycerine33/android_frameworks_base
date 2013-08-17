@@ -247,10 +247,6 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 mEngine = null;
                 if (mWallpaper.connection == this) {
                     Slog.w(TAG, "Wallpaper service gone: " + mWallpaper.wallpaperComponent);
-                    if (mWallpaper.wallpaperComponent.equals(IMAGE_WALLPAPER)) {
-                        Slog.w(TAG, "SystemUI wallpaper disconnected, assuming it's being restarted, not clearing wallpaper.");
-                        return;
-                    }
                     if (!mWallpaper.wallpaperUpdating
                             && (mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME)
                                 > SystemClock.uptimeMillis()
@@ -641,6 +637,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             if (width <= 0 || height <= 0) {
                 throw new IllegalArgumentException("width and height must be > 0");
+            }
+
+            int maxWidth = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_wallpaperMaxWidth);
+            if (maxWidth != -1 && width > maxWidth) {
+                  width = maxWidth;
             }
 
             if (width != wallpaper.width || height != wallpaper.height) {

@@ -25,13 +25,11 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.service.notification.StatusBarNotification;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.CustomTheme;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -41,10 +39,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
@@ -59,7 +54,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -180,9 +174,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
 
-    // clock
-    private boolean mShowClock;
-
     private int mSystemUiVisibility = 0;
 
     private int mNavigationIconHints = 0;
@@ -244,12 +235,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.packageName = mContext.getPackageName();
         mWindowManager.addView(sb, lp);
     }
-
-    // last theme that was applied in order to detect theme change (as opposed
-    // to some other configuration change).
-    CustomTheme mCurrentTheme;
-    private boolean mRecreating = false;
-
 
     protected void addPanelWindows() {
         final Context context = mContext;
@@ -381,11 +366,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         return getNotificationPanelHeight();
     }
 
-    @Override
-    protected boolean isNotificationPanelFullyVisible() {
-        return mNotificationPanel.getVisibility() == View.VISIBLE;
-    }
-
     private int getNotificationPanelHeight() {
         final Resources res = mContext.getResources();
         final Display d = mWindowManager.getDefaultDisplay();
@@ -399,51 +379,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         super.start(); // will add the main bar view
     }
 
-    private static void copyNotifications(ArrayList<Pair<IBinder, StatusBarNotification>> dest,
-            NotificationData source) {
-        int N = source.size();
-        for (int i = 0; i < N; i++) {
-            NotificationData.Entry entry = source.get(i);
-            dest.add(Pair.create(entry.key, entry.notification));
-        }
-    }
-
-    private void recreateStatusBar() {
-        mRecreating = true;
-        mStatusBarContainer.removeAllViews();
-
-        // extract notifications.
-        int nNotifs = mNotificationData.size();
-        ArrayList<Pair<IBinder, StatusBarNotification>> notifications =
-                new ArrayList<Pair<IBinder, StatusBarNotification>>(nNotifs);
-        copyNotifications(notifications, mNotificationData);
-        mNotificationData.clear();
-
-        mStatusBarContainer.addView(makeStatusBarView());
-
-        // recreate notifications.
-        for (int i = 0; i < nNotifs; i++) {
-            Pair<IBinder, StatusBarNotification> notifData = notifications.get(i);
-            addNotificationViews(notifData.first, notifData.second);
-        }
-
-        setAreThereNotifications();
-
-        mRecreating = false;
-    }
-
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        // detect theme change.
-        CustomTheme newTheme = mContext.getResources().getConfiguration().customTheme;
-        if (newTheme != null &&
-                (mCurrentTheme == null || !mCurrentTheme.equals(newTheme))) {
-            mCurrentTheme = (CustomTheme)newTheme.clone();
-            recreateStatusBar();
-        }
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
         mWindowManager.updateViewLayout(mNotificationPanel, mNotificationPanelParams);
@@ -511,11 +449,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected View makeStatusBarView() {
         final Context context = mContext;
 
-        CustomTheme currentTheme = mContext.getResources().getConfiguration().customTheme;
-        if (currentTheme != null) {
-            mCurrentTheme = (CustomTheme)currentTheme.clone();
-        }
-
         loadDimens();
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
@@ -523,6 +456,15 @@ public class TabletStatusBar extends BaseStatusBar implements
         mStatusBarView = sb;
 
         sb.setHandler(mHandler);
+
+        try {
+            // Sanity-check that someone hasn't set up the config wrong and asked for a navigation
+            // bar on a tablet that has only the system bar
+            if (mWindowManagerService.hasNavigationBar()) {
+                Slog.e(TAG, "Tablet device cannot show navigation bar and system bar");
+            }
+        } catch (RemoteException ex) {
+        }
 
         mBarContents = (ViewGroup) sb.findViewById(R.id.bar_contents);
 
@@ -712,30 +654,6 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    public void toggleNotificationShade() {
-        int msg = (mNotificationPanel.isShowing())
-                ? MSG_CLOSE_NOTIFICATION_PANEL : MSG_OPEN_NOTIFICATION_PANEL;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
-    @Override
-    public void toggleQSShade() {
-    }
-
-    @Override
-    public void toggleStatusBar(boolean enable) {
-    }
-
-    @Override
-    public void setImeShowStatus(boolean enabled) {
-    }
-
-    @Override
-    public void setAutoRotate(boolean enabled) {
-    }
-
-    @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
         mSearchPanelView.setStatusBarView(mStatusBarView);
@@ -772,14 +690,14 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     public void onBarHeightChanged(int height) {
         final WindowManager.LayoutParams lp
-                = (WindowManager.LayoutParams)mStatusBarContainer.getLayoutParams();
+                = (WindowManager.LayoutParams)mStatusBarView.getLayoutParams();
         if (lp == null) {
             // haven't been added yet
             return;
         }
         if (lp.height != height) {
             lp.height = height;
-            mWindowManager.updateViewLayout(mStatusBarContainer, lp);
+            mWindowManager.updateViewLayout(mStatusBarView, lp);
         }
     }
 
@@ -949,7 +867,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                 notification.getNotification().fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
             }
-        } else if (!mRecreating) {
+        } else {
             tick(key, notification, true);
         }
 
@@ -964,13 +882,10 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     public void showClock(boolean show) {
-        ContentResolver resolver = mContext.getContentResolver();
         View clock = mBarContents.findViewById(R.id.clock);
         View network_text = mBarContents.findViewById(R.id.network_text);
-        mShowClock = (Settings.System.getInt(resolver,
-                Settings.System.STATUS_BAR_CLOCK, 1) == 1);
         if (clock != null) {
-            clock.setVisibility(show ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE);
+            clock.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         if (network_text != null) {
             network_text.setVisibility((!show) ? View.VISIBLE : View.GONE);
@@ -1028,14 +943,6 @@ public class TabletStatusBar extends BaseStatusBar implements
                 mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
                 mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
             }
-        }
-        if ((diff & (StatusBarManager.DISABLE_HOME
-                | StatusBarManager.DISABLE_RECENT
-                | StatusBarManager.DISABLE_BACK
-                | StatusBarManager.DISABLE_SEARCH)) != 0) {
-
-            // all navigation bar listeners will take care of these
-            propagateDisabledFlags(state);
         }
     }
 
@@ -1119,7 +1026,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     }
 
     @Override
-    public void animateExpandSettingsPanel(boolean flip) {
+    public void animateExpandSettingsPanel() {
         // TODO: Implement when TabletStatusBar begins to be used.
     }
 
@@ -1146,8 +1053,6 @@ public class TabletStatusBar extends BaseStatusBar implements
             (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
                 ? R.drawable.ic_sysbar_back_ime
                 : R.drawable.ic_sysbar_back);
-
-        propagateNavigationIconHints(hints);
     }
 
     private void notifyUiVisibilityChanged() {
@@ -1197,7 +1102,6 @@ public class TabletStatusBar extends BaseStatusBar implements
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
         mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
-        propagateMenuVisibility(showMenu);
 
         // See above re: lights-out policy for legacy apps.
         if (showMenu) setLightsOn(true);

@@ -17,7 +17,6 @@
 package android.view;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -421,7 +420,6 @@ public interface WindowManagerPolicy {
 
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
-        public void reboot();
     }
 
     /** Window has been added to the screen. */
@@ -599,18 +597,6 @@ public interface WindowManagerPolicy {
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
-
-    public int getWallpaperHeight(int rotation);
-
-    public int getWallpaperWidth(int rotation);
-
-    public int getWallpaperTop(int rot);
-
-    public int getWallpaperLeft(int rot);
-
-    public int getWallpaperBottom(int rot);
-
-    public int getWallpaperRight(int rot);
 
     /**
      * Return whether the given window should forcibly hide everything
@@ -1172,12 +1158,6 @@ public interface WindowManagerPolicy {
      * {@link android.content.Intent#ACTION_ASSIST}
      */
     public void showAssistant();
-
-    /**
-     * Ask keyguard to invoke a custom intent after dismissing keyguard
-     * @hide
-     */
-    public void showCustomIntent(Intent intent);
 
     /**
      * Returns whether a given window type can be magnified.

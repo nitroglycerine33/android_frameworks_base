@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.UserHandle;
 import android.util.SparseArray;
 
 import java.util.HashMap;
@@ -95,7 +94,7 @@ public final class AttributeCache {
         }
     }
     
-    public Entry get(String packageName, int resId, int[] styleable, int userId) {
+    public Entry get(String packageName, int resId, int[] styleable) {
         synchronized (this) {
             Package pkg = mPackages.get(packageName);
             HashMap<int[], Entry> map = null;
@@ -111,8 +110,7 @@ public final class AttributeCache {
             } else {
                 Context context;
                 try {
-                    context = mContext.createPackageContextAsUser(packageName, 0,
-                            new UserHandle(userId));
+                    context = mContext.createPackageContext(packageName, 0);
                     if (context == null) {
                         return null;
                     }
@@ -140,3 +138,4 @@ public final class AttributeCache {
         }
     }
 }
+

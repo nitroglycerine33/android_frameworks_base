@@ -22,3 +22,4 @@ public class CarrierProvisioningUrlsInstallReceiver extends ConfigUpdateInstallR
         super("/data/misc/radio/", "provisioning_urls.xml", "metadata/", "version");
     }
 }
+

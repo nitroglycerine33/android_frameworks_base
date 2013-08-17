@@ -20,7 +20,6 @@ import android.graphics.Point;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
-import android.content.Intent;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -88,7 +87,7 @@ public class IWindowManagerImpl implements IWindowManager {
     // ---- unused implementation of IWindowManager ----
 
     @Override
-    public void addAppToken(int arg0, int arg1p5, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
+    public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4,
                             boolean arg5)
             throws RemoteException {
         // TODO Auto-generated method stub
@@ -485,17 +484,6 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void showAssistant() {
-
-    }
-
-    /* @hide */
-    @Override
-    public void showCustomIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void updateDisplayMetrics() {
 
     }
 

@@ -42,7 +42,6 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
-import android.content.pm.ThemeInfo;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.content.IntentSender;
@@ -225,11 +224,7 @@ interface IPackageManager {
 
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
-
-    boolean getPrivacyGuardSetting(in String packageName, int userId);
-
-    void setPrivacyGuardSetting(in String packageName, boolean enabled, int userId);
-
+    
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */

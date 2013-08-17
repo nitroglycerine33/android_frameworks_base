@@ -58,7 +58,6 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void disable(int state) {
-        propagateDisabledFlags(state);
     }
 
     @Override
@@ -75,7 +74,6 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void topAppWindowChanged(boolean visible) {
-        propagateMenuVisibility(visible);
     }
 
     @Override
@@ -87,32 +85,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void toggleNotificationShade() {
-    }
-
-    @Override
-    public void toggleQSShade() {
-    }
-
-    @Override
-    public void toggleStatusBar(boolean enable) {
-    }
-
-    @Override
-    public void setImeShowStatus(boolean enabled) {
-    }
-
-    @Override
-    public void setAutoRotate(boolean enabled) {
-    }
-
-    @Override
     public void toggleRecentApps() {
     }
 
     @Override // CommandQueue
     public void setNavigationIconHints(int hints) {
-        propagateNavigationIconHints(hints);
     }
 
     @Override
@@ -157,11 +134,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected boolean isNotificationPanelFullyVisible() {
-        return false;
-    }
-
-    @Override
     protected boolean shouldDisableNavbarGestures() {
         return true;
     }
@@ -171,7 +143,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void animateExpandSettingsPanel(boolean flip) {
+    public void animateExpandSettingsPanel() {
     }
 
     @Override

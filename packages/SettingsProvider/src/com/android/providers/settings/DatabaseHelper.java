@@ -677,8 +677,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            String[] settingsToMove = {
                    Secure.LOCK_PATTERN_ENABLED,
                    Secure.LOCK_PATTERN_VISIBLE,
-                   Secure.LOCK_SHOW_ERROR_PATH,
-                   Secure.LOCK_DOTS_VISIBLE,
                    Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
                    "lockscreen.password_type",
                    "lockscreen.lockoutattemptdeadline",
@@ -805,12 +803,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 58) {
             /* Add default for new Auto Time Zone */
-            int autoTimeValue = getIntValueFromSystem(db, Settings.Global.AUTO_TIME, 0);
+            int autoTimeValue = getIntValueFromSystem(db, Settings.System.AUTO_TIME, 0);
             db.beginTransaction();
             SQLiteStatement stmt = null;
             try {
                 stmt = db.compileStatement("INSERT INTO system(name,value)" + " VALUES(?,?);");
-                loadSetting(stmt, Settings.Global.AUTO_TIME_ZONE,
+                loadSetting(stmt, Settings.System.AUTO_TIME_ZONE,
                         autoTimeValue); // Sync timezone to NITZ if auto_time was enabled
                 db.setTransactionSuccessful();
             } finally {
@@ -1657,7 +1655,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
-                            lpu.stringToPattern(lockPattern);
+                            LockPatternUtils.stringToPattern(lockPattern);
                     lpu.saveLockPattern(cellPattern);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
@@ -1999,6 +1997,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.bool.def_sound_effects_enabled);
         loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
                 R.bool.def_haptic_feedback);
+
         loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
             R.integer.def_lockscreen_sounds_enabled);
     }
@@ -2099,9 +2098,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
                     R.bool.def_user_setup_complete);
-
-            loadIntegerSetting(stmt, Settings.Secure.DIALPAD_AUTOCOMPLETE,
-                    R.integer.def_dialpad_autocomplete);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2232,14 +2228,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_undock_sound);
             loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
                     R.string.def_wireless_charging_started_sound);
+
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);
-            loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
-                    R.bool.def_power_notifications_enabled);
-            loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_VIBRATE,
-                    R.bool.def_power_notifications_vibrate);
-            loadStringSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_RINGTONE,
-                    R.string.def_power_notifications_ringtone);
 
             loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
             loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,

@@ -1860,10 +1860,12 @@ int doSingleCrunch(Bundle* bundle)
 
     String8 input(bundle->getSingleCrunchInputFile());
     String8 output(bundle->getSingleCrunchOutputFile());
+
     if (preProcessImageToCache(bundle, input, output) != NO_ERROR) {
         // we can't return the status_t as it gets truncate to the lower 8 bits.
         return 42;
     }
+
     return NO_ERROR;
 }
 

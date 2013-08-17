@@ -27,7 +27,6 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -54,12 +53,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     private static float CAMERA_DISTANCE = 10000;
     protected static float OVERSCROLL_MAX_ROTATION = 30;
     private static final boolean PERFORM_OVERSCROLL_ROTATION = true;
-
-    private static final String[] CLOCK_WIDGET_PACKAGES = new String[] {
-        "net.nurik.roman.dashclock",
-        "com.cyanogenmod.lockclock",
-        "com.android.deskclock"
-    };
 
     private static final int FLAG_HAS_LOCAL_HOUR = 0x1;
     private static final int FLAG_HAS_LOCAL_MINUTE = 0x2;
@@ -149,16 +142,6 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
             ViewGroup vg = (ViewGroup) newPage;
             if (vg.getChildAt(0) instanceof KeyguardStatusView) {
                 showingClock = true;
-            } else if (vg.getChildAt(0) instanceof AppWidgetHostView) {
-                AppWidgetProviderInfo info =
-                        ((AppWidgetHostView) vg.getChildAt(0)).getAppWidgetInfo();
-                String widgetPackage = info.provider.getPackageName();
-                for (String packageName : CLOCK_WIDGET_PACKAGES) {
-                    if (packageName.equals(widgetPackage)) {
-                        showingClock = true;
-                        break;
-                    }
-                }
             }
         }
 
@@ -527,8 +510,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     protected void screenScrolled(int screenCenter) {
         mScreenCenter = screenCenter;
         updatePageAlphaValues(screenCenter);
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < getChildCount(); i++) {
             KeyguardWidgetFrame v = getWidgetPageAt(i);
             if (v == mDragView) continue;
             if (v != null) {
@@ -618,10 +600,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         for (int i = 0; i < count; i++) {
             KeyguardWidgetFrame child = getWidgetPageAt(i);
             if (i != mCurrentPage) {
-                if(Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.LOCKSCREEN_DISABLE_HINTS, 0) == 0) {
-                    child.setBackgroundAlpha(sidePageAlpha);
-                }
+                child.setBackgroundAlpha(sidePageAlpha);
                 child.setContentAlpha(0f);
             } else {
                 child.setBackgroundAlpha(0f);

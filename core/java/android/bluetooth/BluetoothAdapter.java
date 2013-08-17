@@ -370,7 +370,9 @@ public final class BluetoothAdapter {
      * Get a handle to the default local Bluetooth adapter.
      * <p>Currently Android only supports one Bluetooth adapter, but the API
      * could be extended to support more. This will always return the default
-     * adapter.
+     * adapter.ublic BluetoothServerSocket listenUsingRfcommWithServiceRecord(String name, UUID uuid)
+            throws IOException {
+        return createNewRfcommSocketAndRecord(name, -1, uuid, true, true);
      * @return the default local adapter, or null if Bluetooth is not supported
      *         on this hardware platform
      */
@@ -1113,7 +1115,6 @@ public final class BluetoothAdapter {
         }
         return socket;
     }
-
     /**
      * Read the local Out of Band Pairing Data
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}

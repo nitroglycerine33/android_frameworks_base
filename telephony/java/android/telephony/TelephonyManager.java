@@ -130,10 +130,10 @@ public class TelephonyManager {
      * call. By default, the MMS app consumes this message and sends a text message to the caller. A
      * third party app can provide this functionality in lieu of MMS app by consuming this Intent
      * and sending the message using their own messaging system.  The intent contains a URI
-     * describing the recipient, and an EXTRA containing the message itself.
-     * <p class="note"><strong>Note:</strong>
+     * describing the recipient, and an EXTRA containg the message itself.
+     * <p>
      * The intent-filter which consumes this Intent needs to be in a service which requires the
-     * permission {@link android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE}.</p>
+     * permission SEND_RESPOND_VIA_MESSAGE.
      *
      * <p>
      * {@link android.content.Intent#getData} is a URI describing the recipient of the message.
@@ -674,17 +674,6 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return NETWORK_TYPE_UNKNOWN;
-        }
-    }
-
-    /**
-     * {@hide}
-     */
-    public void toggleLTE(boolean on) {
-        try {
-            getITelephony().toggleLTE(on);
-        } catch (RemoteException e) {
-            //Silently fail
         }
     }
 
@@ -1295,7 +1284,7 @@ public class TelephonyManager {
     public void listen(PhoneStateListener listener, int events) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         try {
-            Boolean notifyNow = true;
+            Boolean notifyNow = (getITelephony() != null);
             sRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead

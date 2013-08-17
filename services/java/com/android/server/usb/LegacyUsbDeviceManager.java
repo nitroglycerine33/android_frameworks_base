@@ -107,7 +107,6 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
     private boolean mUseUsbNotification;
     private boolean mAdbEnabled;
     private boolean mLegacy = false;
-    private UsbDebuggingManager mDebuggingManager;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -166,9 +165,6 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mHandler = new LegacyUsbHandler(thread.getLooper());
-        if ("1".equals(SystemProperties.get("ro.adb.secure"))) {
-            mDebuggingManager = new UsbDebuggingManager(context);
-        }
     }
 
     public void setCurrentSettings(UsbSettingsManager settings) {
@@ -198,7 +194,7 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
         StorageVolume[] volumes = storageManager.getVolumeList();
 
         if (volumes.length > 0) {
-            if (Settings.Global.getInt(mContentResolver, Settings.Global.USB_MASS_STORAGE_ENABLED, 0 ) == 1 ) {
+            if (Settings.Secure.getInt(mContentResolver, Settings.Secure.USB_MASS_STORAGE_ENABLED, 0 ) == 1 ) {
                 massStorageSupported = volumes[0].allowMassStorage();
             } else {
                 massStorageSupported = false;
@@ -337,14 +333,6 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
                 mContentResolver.registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.ADB_ENABLED),
                     false, new AdbSettingsObserver());
-
-                mContentResolver.registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.ADB_NOTIFY),
-                    false, new ContentObserver(null) {
-                        public void onChange(boolean selfChange) {
-                            updateAdbNotification();
-                        }
-                     });
 
                 // Watch for USB configuration changes
                 if (mLegacy) {
@@ -556,9 +544,6 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
                     if (mCurrentAccessory != null) {
                         getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
-                    if (mDebuggingManager != null) {
-                        mDebuggingManager.setAdbEnabled(mAdbEnabled);
-                    }
                     break;
             }
         }
@@ -628,10 +613,7 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
             if (mNotificationManager == null) return;
             final int id = com.android.internal.R.string.adb_active_notification_title;
             if (mAdbEnabled && mConnected) {
-                if ("0".equals(SystemProperties.get("persist.adb.notify"))
-                 || Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.ADB_NOTIFY, 1) == 0)
-                    return;
+                if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
 
                 if (!mAdbNotificationShown) {
                     Resources r = mContext.getResources();
@@ -678,27 +660,6 @@ public class LegacyUsbDeviceManager extends UsbDeviceManager {
             } catch (IOException e) {
                 pw.println("IOException: " + e);
             }
-        }
-    }
-
-    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
-        if (mDebuggingManager != null) {
-            mDebuggingManager.allowUsbDebugging(alwaysAllow, publicKey);
-        }
-    }
-
-    public void denyUsbDebugging() {
-        if (mDebuggingManager != null) {
-            mDebuggingManager.denyUsbDebugging();
-        }
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw) {
-        if (mHandler != null) {
-            mHandler.dump(fd, pw);
-        }
-        if (mDebuggingManager != null) {
-            mDebuggingManager.dump(fd, pw);
         }
     }
 }

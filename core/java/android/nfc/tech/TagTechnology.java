@@ -157,14 +157,14 @@ public interface TagTechnology extends Closeable {
      */
     public static final int NFC_BARCODE = 10;
 
-   /**
+    /**
      * This technology is an instance of {@link IsoPcdA}.
      * <p>Support for this technology type is optional. If a stack doesn't support this technology
      * type tags using it must still be discovered and present the lower level radio interface
      * technologies in use.
      * @hide
      */
-    public static final int ISO_PCD_A = 100;
+    public static final int ISO_PCD_A = 11;
 
     /**
      * This technology is an instance of {@link IsoPcdB}.
@@ -173,7 +173,7 @@ public interface TagTechnology extends Closeable {
      * technologies in use.
      * @hide
      */
-    public static final int ISO_PCD_B = 101;
+    public static final int ISO_PCD_B = 12;
 
     /**
      * Get the {@link Tag} object backing this {@link TagTechnology} object.

@@ -1,6 +1,5 @@
 //
 // Copyright 2006 The Android Open Source Project
-// This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
 //
 // Build resource files from raw assets.
 //
@@ -2816,7 +2815,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d uiInverted:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       config.mcc, config.mnc,
@@ -2825,7 +2824,6 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.country[0] ? config.country[0] : '-',
                       config.country[1] ? config.country[1] : '-',
                       config.orientation,
-                      config.uiInvertedMode,
                       config.uiMode,
                       config.touchscreen,
                       config.density,
@@ -2860,7 +2858,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d uiInverted:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
@@ -2869,7 +2867,6 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.country[0] ? tHeader->config.country[0] : '-',
                       tHeader->config.country[1] ? tHeader->config.country[1] : '-',
                       tHeader->config.orientation,
-                      tHeader->config.uiInvertedMode,
                       tHeader->config.uiMode,
                       tHeader->config.touchscreen,
                       tHeader->config.density,
@@ -3758,16 +3755,7 @@ sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
             mHaveAppPackage = true;
             p = new Package(package, 127);
         } else {
-            int extendedPackageId = mBundle->getExtendedPackageId();
-            if (extendedPackageId != 0) {
-                if ((uint32_t)extendedPackageId < mNextPackageId) {
-                    fprintf(stderr, "Package ID %d already in use!\n", mNextPackageId);
-                    return NULL;
-                }
-                p = new Package(package, extendedPackageId);
-            } else {
-                p = new Package(package, mNextPackageId);
-            }
+            p = new Package(package, mNextPackageId);
         }
         //printf("*** NEW PACKAGE: \"%s\" id=%d\n",
         //       String8(package).string(), p->getAssignedId());

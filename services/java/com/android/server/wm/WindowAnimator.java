@@ -14,7 +14,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import android.content.Context;
 import android.os.Debug;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -27,6 +26,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
+import com.android.server.wm.WindowManagerService.DisplayContentsIterator;
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
 import java.io.PrintWriter;
@@ -226,9 +226,6 @@ public class WindowAnimator {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
 
-                int mTransparent = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.LOCKSCREEN_BACKGROUND_VALUE, 3);
-
                 if (WindowManagerService.DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
                             ", nowAnimating=" + nowAnimating);
@@ -258,8 +255,7 @@ public class WindowAnimator {
                         }
                         mService.mFocusMayChange = true;
                     }
-                    if (mTransparent == 3) {
-                     if (win.isReadyForDisplay()) {
+                    if (win.isReadyForDisplay()) {
                         if (nowAnimating) {
                             if (winAnimator.mAnimationIsEntrance) {
                                 mForceHiding = KEYGUARD_ANIMATING_IN;
@@ -269,10 +265,7 @@ public class WindowAnimator {
                         } else {
                             mForceHiding = KEYGUARD_SHOWN;
                         }
-                      }
-                     }else {
-                          mForceHiding = KEYGUARD_NOT_SHOWN;
-                     }
+                    }
                     if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                             "Force hide " + mForceHiding
                             + " hasSurface=" + win.mHasSurface
@@ -634,9 +627,9 @@ public class WindowAnimator {
         }
 
         boolean hasPendingLayoutChanges = false;
-        final int numDisplays = mService.mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
+        DisplayContentsIterator iterator = mService.new DisplayContentsIterator();
+        while (iterator.hasNext()) {
+            final DisplayContent displayContent = iterator.next();
             final int pendingChanges = getPendingLayoutChanges(displayContent.getDisplayId());
             if ((pendingChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;

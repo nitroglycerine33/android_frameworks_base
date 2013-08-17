@@ -3520,8 +3520,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // We want to pause the current playing video when switching out
             // from the current WebView/tab.
             if (mHTML5VideoViewProxy != null) {
-                // Use suspend instead of pause to release the decoder
-                mHTML5VideoViewProxy.suspendAndDispatch();
+                mHTML5VideoViewProxy.pauseAndDispatch();
             }
             if (mNativeClass != 0) {
                 nativeSetPauseDrawing(mNativeClass, true);
@@ -4485,13 +4484,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         return selectText(x, y);
     }
 
-    public void clearSelection() {
-        selectionDone();
-        if (mWebViewCore != null) {
-            mWebViewCore.sendMessage(EventHub.CLEAR_SELECT_TEXT);
-        }
-    }
-
     /**
      * Select the word at the indicated content coordinates.
      */
@@ -4509,7 +4501,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void onConfigurationChanged(Configuration newConfig) {
         mCachedOverlappingActionModeHeight = -1;
         if (mSelectingText && mOrientation != newConfig.orientation) {
-            clearSelection();
+            selectionDone();
         }
         mOrientation = newConfig.orientation;
         if (mWebViewCore != null && !mBlockWebkitViewMessages) {

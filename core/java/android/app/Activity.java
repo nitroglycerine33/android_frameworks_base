@@ -47,10 +47,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -80,8 +78,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
-
-import com.android.internal.statusbar.IStatusBarService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -699,9 +695,6 @@ public class Activity extends ContextThemeWrapper
     private SearchManager mSearchManager;
     private MenuInflater mMenuInflater;
 
-    private IStatusBarService mStatusBarService;
-    private Object mServiceAquireLock = new Object();
-
     static final class NonConfigurationInstances {
         Object activity;
         HashMap<String, Object> children;
@@ -722,10 +715,6 @@ public class Activity extends ContextThemeWrapper
 
     private CharSequence mTitle;
     private int mTitleColor = 0;
-
-    private boolean mQuickPeekAction = false;
-    private boolean mNtQsShadeActive = false;
-    private float mQuickPeekInitialY;
 
     final FragmentManagerImpl mFragments = new FragmentManagerImpl();
     final FragmentContainer mContainer = new FragmentContainer() {
@@ -2423,78 +2412,21 @@ public class Activity extends ContextThemeWrapper
      * intercept all touch screen events before they are dispatched to the
      * window.  Be sure to call this implementation for touch screen events
      * that should be handled normally.
-     *
+     * 
      * @param ev The touch screen event.
-     *
+     * 
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        final int action = ev.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                if (Settings.System.getInt(getContentResolver(),
-                    Settings.System.STATUSBAR_PEEK, 0) == 1) {
-                    if (ev.getY() < getStatusBarHeight()) {
-                        mQuickPeekInitialY = ev.getY();
-                        mQuickPeekAction = true;
-                    } else if (mNtQsShadeActive) {
-                        try {
-                            IStatusBarService statusbar = getStatusBarService();
-                            if (statusbar != null) {
-                                statusbar.toggleStatusBar(false);
-                            }
-                            mNtQsShadeActive = false;
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "RemoteException during toggle statusbar", e);
-                            mStatusBarService = null;
-                        }
-                    }
-                }
-                onUserInteraction();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (!mQuickPeekAction) {
-                    break;
-                }
-                if (Math.abs(ev.getY() - mQuickPeekInitialY) > getStatusBarHeight()) {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.toggleStatusBar(true);
-                        }
-                        mNtQsShadeActive = true;
-                        mQuickPeekAction = false;
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "RemoteException during toggle statusbar", e);
-                        mStatusBarService = null;
-                    }
-                }
-                break;
-            default:
-                mQuickPeekAction = false;
-                break;
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            onUserInteraction();
         }
-
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }
         return onTouchEvent(ev);
     }
-
-    private int getStatusBarHeight() {
-        return getResources().getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-    }
-
-    IStatusBarService getStatusBarService() {
-        synchronized (mServiceAquireLock) {
-            if (mStatusBarService == null) {
-                mStatusBarService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService("statusbar"));
-            }
-            return mStatusBarService;
-        }
-    }
-
+    
     /**
      * Called to process trackball events.  You can override this to
      * intercept all trackball events before they are dispatched to the

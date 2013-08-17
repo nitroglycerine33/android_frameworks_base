@@ -22,8 +22,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
-import com.android.server.power.PowerManagerService;
 import com.android.server.wm.AppTransition;
+import com.android.server.power.PowerManagerService;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -66,7 +66,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
-import android.view.WindowManagerPolicy;
 import com.android.internal.app.ActivityTrigger;
 
 import java.io.IOException;
@@ -287,11 +286,6 @@ final class ActivityStack {
      * Dismiss the keyguard after the next activity is displayed?
      */
     boolean mDismissKeyguardOnNextActivity = false;
-
-    /**
-     * Is the privacy guard currently enabled?
-     */
-    String mPrivacyGuardPackageName = null;
 
     /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
@@ -1284,7 +1278,6 @@ final class ActivityStack {
         } else {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
-        updatePrivacyGuardNotificationLocked(next);
     }
 
     /**
@@ -1778,7 +1771,7 @@ final class ActivityStack {
                 next.app.pendingUiClean = true;
                 next.app.thread.scheduleResumeActivity(next.appToken,
                         mService.isNextTransitionForward());
-
+                
                 checkReadyForSleepLocked();
 
             } catch (Exception e) {
@@ -1842,34 +1835,6 @@ final class ActivityStack {
         return true;
     }
 
-    private final void updatePrivacyGuardNotificationLocked(ActivityRecord next) {
-
-        if (mPrivacyGuardPackageName != null && mPrivacyGuardPackageName.equals(next.packageName)) {
-            return;
-        }
-
-        boolean privacy = false;
-
-        try {
-            privacy = AppGlobals.getPackageManager().getPrivacyGuardSetting(
-                    next.packageName, next.userId);
-        } catch (RemoteException e) {
-            // nothing
-        }
-
-        if (mPrivacyGuardPackageName != null && !privacy) {
-            Message msg = mService.mHandler.obtainMessage(
-                    ActivityManagerService.CANCEL_PRIVACY_NOTIFICATION_MSG, next.userId);
-            msg.sendToTarget();
-            mPrivacyGuardPackageName = null;
-        } else if (privacy) {
-            Message msg = mService.mHandler.obtainMessage(
-                    ActivityManagerService.POST_PRIVACY_NOTIFICATION_MSG, next);
-            msg.sendToTarget();
-            mPrivacyGuardPackageName = next.packageName;
-        }
-    }
-
     private final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
         final int NH = mHistory.size();
@@ -1898,8 +1863,8 @@ final class ActivityStack {
                         }
                         mHistory.add(addPos, r);
                         r.putInHistory();
-                        mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
-                                r.task.taskId, r.info.screenOrientation, r.fullscreen,
+                        mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
+                                r.info.screenOrientation, r.fullscreen,
                                 (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
@@ -1963,8 +1928,8 @@ final class ActivityStack {
                 mNoAnimActivities.remove(r);
             }
             r.updateOptionsLocked(options);
-            mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
-                    r.task.taskId, r.info.screenOrientation, r.fullscreen,
+            mService.mWindowManager.addAppToken(
+                    addPos, r.appToken, r.task.taskId, r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             boolean doShow = true;
             if (newTask) {
@@ -2002,8 +1967,8 @@ final class ActivityStack {
         } else {
             // If this is the first activity, don't do any fancy animations,
             // because there is nothing for it to animate on top of.
-            mService.mWindowManager.addAppToken(addPos, r.userId, r.appToken,
-                    r.task.taskId, r.info.screenOrientation, r.fullscreen,
+            mService.mWindowManager.addAppToken(addPos, r.appToken, r.task.taskId,
+                    r.info.screenOrientation, r.fullscreen,
                     (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
             ActivityOptions.abort(options);
         }

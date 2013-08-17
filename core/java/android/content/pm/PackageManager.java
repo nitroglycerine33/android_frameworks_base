@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
- * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -674,6 +673,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
+
+    /**
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the package because of a policy denial.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_POLICY_REJECTED_PERMISSION = -111;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
@@ -1701,17 +1708,6 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<PackageInfo> getInstalledPackages(int flags, int userId);
-
-    /**
-     * Return a List of all theme packages that are installed
-     * on the device.
-     *
-     * @return A List of PackageInfo objects, one for each theme package
-     *         that is installed on the device.
-     *
-     * @hide
-     */
-    public abstract List<PackageInfo> getInstalledThemePackages();
 
     /**
      * Check whether a particular package has been granted a particular
@@ -3109,22 +3105,6 @@ public abstract class PackageManager {
      * @throws IllegalArgumentException if the named package does not exist.
      */
     public abstract int getApplicationEnabledSetting(String packageName);
-
-    /**
-     * @param packageName
-     * @return
-     *
-     * @hide
-     */
-    public abstract boolean getPrivacyGuardSetting(String packageName);
-
-    /**
-     * @param packageName
-     * @param enabled
-     *
-     * @hide
-     */
-    public abstract void setPrivacyGuardSetting(String packageName, boolean enabled);
 
     /**
      * Return whether the device has been booted into safe mode.

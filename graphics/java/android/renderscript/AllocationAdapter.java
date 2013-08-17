@@ -22,7 +22,6 @@ import android.graphics.BitmapFactory;
 import android.util.TypedValue;
 
 /**
- * Only intended for use by generated reflected code.
  *
  **/
 public class AllocationAdapter extends Allocation {

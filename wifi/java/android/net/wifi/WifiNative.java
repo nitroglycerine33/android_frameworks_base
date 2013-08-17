@@ -38,7 +38,6 @@ public class WifiNative {
 
     private static final boolean DBG = false;
     private final String mTAG;
-
     private static final int DEFAULT_GROUP_OWNER_INTENT     = 6;
 
     static final int BLUETOOTH_COEXISTENCE_MODE_ENABLED     = 0;
@@ -199,7 +198,6 @@ public class WifiNative {
     /**
      * Format of results:
      * =================
-     * id=1
      * bssid=68:7f:74:d7:1b:6e
      * freq=2412
      * level=-43
@@ -210,11 +208,10 @@ public class WifiNative {
      * ====
      *
      * RANGE=ALL gets all scan results
-     * RANGE=ID- gets results from ID
      * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
      */
-    public String scanResults(int sid) {
-        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x21987");
+    public String scanResults() {
+        return doStringCommand("BSS RANGE=ALL MASK=0x21987");
     }
 
     public boolean startDriver() {
@@ -795,50 +792,6 @@ public class WifiNative {
         return doBooleanCommand("P2P_SERV_DISC_CANCEL_REQ " + id);
     }
 
-    public boolean getModeCapability(String mode) {
-        String ret = doStringCommand("GET_CAPABILITY modes");
-        if (!TextUtils.isEmpty(ret)) {
-            String[] tokens = ret.split(" ");
-            for (String t : tokens) {
-                if (t.compareTo(mode) == 0)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    public List<WifiChannel> getSupportedChannels() {
-        boolean ibssAllowed;
-        List<WifiChannel> channels = new ArrayList<WifiChannel>();
-        String ret = doStringCommand("GET_CAPABILITY freq");
-
-        if (!TextUtils.isEmpty(ret)) {
-            String[] lines = ret.split("\n");
-            for (String l : lines) {
-               if (l.startsWith("Mode") || TextUtils.isEmpty(l)) continue;
-
-               String[] tokens = l.split(" ");
-               if (tokens.length < 4) continue;
-
-               if (tokens.length == 6 && tokens[5].contains("NO_IBSS"))
-                   ibssAllowed = false;
-               else
-                   ibssAllowed = true;
-
-               try {
-                   WifiChannel ch = new WifiChannel(Integer.parseInt(tokens[1]), Integer.parseInt(tokens[3]), ibssAllowed);
-                   if (!channels.contains(ch))
-                       channels.add(ch);
-               } catch (java.lang.NumberFormatException e) {
-                   Log.d(mTAG, "Can't parse: " + l);
-               }
-            }
-        }
-        return channels;
-    }
-
-    public native static boolean setMode(int mode);
-
     /* Set the current mode of miracast operation.
      *  0 = disabled
      *  1 = operating as source
@@ -849,4 +802,5 @@ public class WifiNative {
         doBooleanCommand("DRIVER MIRACAST " + mode);
     }
 
+    public native static boolean setMode(int mode);
 }

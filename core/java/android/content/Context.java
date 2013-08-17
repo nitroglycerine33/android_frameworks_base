@@ -1919,18 +1919,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.app.ProfileManager} for setting
-     * notification profiles.
-     *
-     * @see #getSystemService
-     * @see android.app.ProfileManager
-     *
-     * @hide
-     */
-    public static final String PROFILE_SERVICE = "profile";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.accessibility.AccessibilityManager} for giving the user
      * feedback for UI events through the registered event listeners.
      *
@@ -2282,16 +2270,6 @@ public abstract class Context {
      * @see android.os.UserManager
      */
     public static final String USER_SERVICE = "user";
-
-    /**
-     * Determine whether the application or calling application has
-     * privacy guard. This is a privacy feature intended to permit the user
-     * to control access to personal data. Applications and content providers
-     * can check this value if they wish to honor privacy guard.
-     *
-     * @hide
-     */
-    public abstract boolean isPrivacyGuardEnabled();
 
     /**
      * Use with {@link #getSystemService} to retrieve a

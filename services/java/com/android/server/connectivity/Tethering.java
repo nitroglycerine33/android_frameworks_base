@@ -36,8 +36,6 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -50,7 +48,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IState;
@@ -78,7 +75,6 @@ import java.util.Set;
 public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private Context mContext;
-    private Context mUiContext;
     private final static String TAG = "Tethering";
     private final static boolean DBG = true;
     private final static boolean VDBG = false;
@@ -130,11 +126,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
     private static final String DNS_DEFAULT_SERVER2 = "8.8.4.4";
 
-    private static final String ACTION_TURN_WIFI_AP_OFF =
-            "com.android.server.ACTION_TURN_WIFI_AP_OFF";
-
-    private static NotificationBroadcastReciever mNotificationBroadcastReceiver = null;
-
     private StateMachine mTetherMasterSM;
 
     private Notification mTetheredNotification;
@@ -168,13 +159,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiver(mStateReceiver, filter);
 
-        ThemeUtils.registerThemeChangeReceiver(mContext, new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context content, Intent intent) {
-                mUiContext = null;
-            }
-        });
-
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_SHARED);
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
@@ -207,22 +191,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         int ifaceTypes[] = mContext.getResources().getIntArray(
                 com.android.internal.R.array.config_tether_upstream_types);
         Collection<Integer> upstreamIfaceTypes = new ArrayList();
-        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-        try {
-            int activeNetType = cm.getActiveNetworkInfo().getType();
-            for (int i : ifaceTypes) {
-                if(i == activeNetType) {
-                    upstreamIfaceTypes.add(new Integer(i));
-                }
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "Exception adding default nw to upstreamIfaceTypes: " + e);
-        }
         for (int i : ifaceTypes) {
-            if(!upstreamIfaceTypes.contains(new Integer(i))) {
-                upstreamIfaceTypes.add(new Integer(i));
-            }
+            upstreamIfaceTypes.add(new Integer(i));
         }
 
         synchronized (mPublicSync) {
@@ -502,50 +472,23 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 tethered_notification_message);
 
         if (mTetheredNotification == null) {
-            Notification.Builder builder = new Notification.Builder(mContext)
-                    .setSmallIcon(icon)
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setContentIntent(pi)
-                    .setWhen(0);
-            if (icon == com.android.internal.R.drawable.stat_sys_tether_wifi) {
-                builder.addAction(
-                        com.android.internal.R.drawable.stat_sys_tether_wifi, mContext.getText(
-                                com.android.internal.R.string.notify_turn_wifi_ap_off_title),
-                                PendingIntent.getBroadcast(mContext, 0,
-                                        new Intent(ACTION_TURN_WIFI_AP_OFF).setPackage(mContext
-                                                .getPackageName()), PendingIntent.FLAG_ONE_SHOT));
-
-                if (mNotificationBroadcastReceiver == null) {
-                    mNotificationBroadcastReceiver = new NotificationBroadcastReciever();
-                    IntentFilter filter = new IntentFilter(ACTION_TURN_WIFI_AP_OFF);
-                    mContext.registerReceiver(mNotificationBroadcastReceiver, filter);
-                }
-
-            }
-            mTetheredNotification = builder.build();
-            mTetheredNotification.defaults &= ~Notification.DEFAULT_SOUND;
-            mTetheredNotification.flags = Notification.FLAG_ONGOING_EVENT;
+            mTetheredNotification = new Notification();
+            mTetheredNotification.when = 0;
         }
+        mTetheredNotification.icon = icon;
+        mTetheredNotification.defaults &= ~Notification.DEFAULT_SOUND;
+        mTetheredNotification.flags = Notification.FLAG_ONGOING_EVENT;
+        mTetheredNotification.tickerText = title;
+        mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
+
         notificationManager.notifyAsUser(null, mTetheredNotification.icon,
                 mTetheredNotification, UserHandle.ALL);
-    }
-
-    private Context getUiContext() {
-        if (mUiContext == null) {
-            mUiContext = ThemeUtils.createUiContext(mContext);
-        }
-        return mUiContext != null ? mUiContext : mContext;
     }
 
     private void clearTetheredNotification() {
         NotificationManager notificationManager =
             (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null && mTetheredNotification != null) {
-            if (mNotificationBroadcastReceiver != null) {
-                mContext.unregisterReceiver(mNotificationBroadcastReceiver);
-                mNotificationBroadcastReceiver = null;
-            }
             notificationManager.cancelAsUser(null, mTetheredNotification.icon,
                     UserHandle.ALL);
             mTetheredNotification = null;
@@ -1176,29 +1119,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             transitionTo(mInitialState);
         }
 
-    }
-
-    private class NotificationBroadcastReciever extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            AsyncTask.execute(new Runnable() {
-                public void run() {
-                    WifiManager wifiManager = (WifiManager)
-                            mContext.getSystemService(Context.WIFI_SERVICE);
-                    wifiManager.setWifiApEnabled(null, false);
-                    try {
-                        if (Settings.Global.getInt(mContext.getContentResolver(),
-                                Settings.Global.WIFI_SAVED_STATE, 0) == 1) {
-                            wifiManager.setWifiEnabled(true);
-                            Settings.Global.putInt(mContext.getContentResolver(),
-                                    Settings.Global.WIFI_SAVED_STATE, 0);
-                        }
-                    } catch (Exception e){
-                    }
-                    return;
-                }
-            });
-        }
     }
 
     class TetherMasterSM extends StateMachine {

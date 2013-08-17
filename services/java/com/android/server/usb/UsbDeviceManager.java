@@ -209,7 +209,7 @@ public class UsbDeviceManager {
         final StorageManager storageManager = StorageManager.from(mContext);
         final StorageVolume primary = storageManager.getPrimaryVolume();
 
-        if (Settings.Global.getInt(mContentResolver, Settings.Global.USB_MASS_STORAGE_ENABLED, 0 ) == 1 ) {
+        if (Settings.Secure.getInt(mContentResolver, Settings.Secure.USB_MASS_STORAGE_ENABLED, 0 ) == 1 ) {
                 massStorageSupported = primary != null && primary.allowMassStorage();
         } else {
                 massStorageSupported = false;
@@ -384,18 +384,6 @@ public class UsbDeviceManager {
                 // register observer to listen for settings changes
                 mContentResolver.registerContentObserver(
                         Settings.Global.getUriFor(Settings.Global.ADB_ENABLED),
-                                false, new AdbSettingsObserver());
-                mContentResolver.registerContentObserver(
-                        Settings.Secure.getUriFor(Settings.Secure.ADB_NOTIFY),
-                                false, new ContentObserver(null) {
-                            public void onChange(boolean selfChange) {
-                                updateAdbNotification();
-                            }
-                        }
-                );
-
-                mContentResolver.registerContentObserver(
-                        Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
                                 false, new AdbSettingsObserver());
 
                 // Watch for USB configuration changes
@@ -667,9 +655,6 @@ public class UsbDeviceManager {
                     if (mDebuggingManager != null) {
                         mDebuggingManager.setAdbEnabled(mAdbEnabled);
                     }
-                    if (android.os.Build.VERSION.CODENAME.equals("UNOFFICIAL")) {
-                        setAdbEnabled(true);
-                    }
                     break;
                 case MSG_USER_SWITCHED: {
                     final boolean mtpActive =
@@ -750,10 +735,7 @@ public class UsbDeviceManager {
             if (mNotificationManager == null) return;
             final int id = com.android.internal.R.string.adb_active_notification_title;
             if (mAdbEnabled && mConnected) {
-                if ("0".equals(SystemProperties.get("persist.adb.notify"))
-                 || Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.ADB_NOTIFY, 1) == 0)
-                    return;
+                if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
 
                 if (!mAdbNotificationShown) {
                     Resources r = mContext.getResources();

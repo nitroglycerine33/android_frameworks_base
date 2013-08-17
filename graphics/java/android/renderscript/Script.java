@@ -19,8 +19,7 @@ package android.renderscript;
 import android.util.SparseArray;
 
 /**
- * The parent class for all executable scripts. This should not be used by
- * applications.
+ *
  **/
 public class Script extends BaseObj {
 
@@ -47,6 +46,14 @@ public class Script extends BaseObj {
     private final SparseArray<KernelID> mKIDs = new SparseArray<KernelID>();
     /**
      * Only to be used by generated reflected classes.
+     *
+     *
+     * @param slot
+     * @param sig
+     * @param ein
+     * @param eout
+     *
+     * @return KernelID
      */
     protected KernelID createKernelID(int slot, int sig, Element ein, Element eout) {
         KernelID k = mKIDs.get(slot);
@@ -85,6 +92,11 @@ public class Script extends BaseObj {
     private final SparseArray<FieldID> mFIDs = new SparseArray();
     /**
      * Only to be used by generated reflected classes.
+     *
+     * @param slot
+     * @param e
+     *
+     * @return FieldID
      */
     protected FieldID createFieldID(int slot, Element e) {
         FieldID f = mFIDs.get(slot);
@@ -106,6 +118,7 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param slot
      */
     protected void invoke(int slot) {
         mRS.nScriptInvoke(getID(mRS), slot);
@@ -114,6 +127,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param slot
+     * @param v
      */
     protected void invoke(int slot, FieldPacker v) {
         if (v != null) {
@@ -126,6 +141,10 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param slot
+     * @param ain
+     * @param aout
+     * @param v
      */
     protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v) {
         if (ain == null && aout == null) {
@@ -150,6 +169,11 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param slot
+     * @param ain
+     * @param aout
+     * @param v
+     * @param sc
      */
     protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v, LaunchOptions sc) {
         if (ain == null && aout == null) {
@@ -184,6 +208,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param va
+     * @param slot
      */
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
@@ -197,6 +223,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, float v) {
         mRS.nScriptSetVarF(getID(mRS), index, v);
@@ -208,6 +236,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, double v) {
         mRS.nScriptSetVarD(getID(mRS), index, v);
@@ -219,6 +249,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, int v) {
         mRS.nScriptSetVarI(getID(mRS), index, v);
@@ -231,6 +263,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, long v) {
         mRS.nScriptSetVarJ(getID(mRS), index, v);
@@ -243,6 +277,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, boolean v) {
         mRS.nScriptSetVarI(getID(mRS), index, v ? 1 : 0);
@@ -254,6 +290,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param o
      */
     public void setVar(int index, BaseObj o) {
         mRS.nScriptSetVarObj(getID(mRS), index, (o == null) ? 0 : o.getID(mRS));
@@ -262,6 +300,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void setVar(int index, FieldPacker v) {
         mRS.nScriptSetVarV(getID(mRS), index, v.getData());
@@ -270,6 +310,10 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
+     * @param e
+     * @param dims
      */
     public void setVar(int index, FieldPacker v, Element e, int[] dims) {
         mRS.nScriptSetVarVE(getID(mRS), index, v.getData(), e.getID(mRS), dims);
@@ -278,6 +322,8 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.
      *
+     * @param index
+     * @param v
      */
     public void getVarV(int index, FieldPacker v) {
         mRS.nScriptGetVarV(getID(mRS), index, v.getData());
@@ -292,10 +338,6 @@ public class Script extends BaseObj {
         }
     }
 
-    /**
-     * Only intended for use by generated reflected code.
-     *
-     */
     public static class Builder {
         RenderScript mRS;
 

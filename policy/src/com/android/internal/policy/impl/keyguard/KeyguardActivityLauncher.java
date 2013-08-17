@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -121,7 +120,6 @@ public abstract class KeyguardActivityLauncher {
 
         pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         pickIntent.putExtra(AppWidgetManager.EXTRA_CUSTOM_SORT, false);
-
         pickIntent.putExtra(AppWidgetManager.EXTRA_CATEGORY_FILTER,
                 AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD);
 
@@ -174,7 +172,7 @@ public abstract class KeyguardActivityLauncher {
         boolean isSecure = lockPatternUtils.isSecure();
         if (!isSecure || showsWhileLocked) {
             if (!isSecure) {
-                getCallback().dismiss(false);
+                dismissKeyguardOnNextActivity();
             }
             try {
                 if (DEBUG) Log.d(TAG, String.format("Starting activity for intent %s at %s",

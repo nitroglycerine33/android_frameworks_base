@@ -1169,7 +1169,7 @@ final class FragmentManagerImpl extends FragmentManager {
         if (!fragment.mHidden) {
             fragment.mHidden = true;
             if (fragment.mView != null) {
-                Animator anim = loadAnimator(fragment, transition, false,
+                Animator anim = loadAnimator(fragment, transition, true,
                         transitionStyle);
                 if (anim != null) {
                     anim.setTarget(fragment.mView);

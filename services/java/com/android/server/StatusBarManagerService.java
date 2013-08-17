@@ -146,7 +146,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
         if (mBar != null) {
             try {
-                mBar.animateExpandSettingsPanel(true);
+                mBar.animateExpandSettingsPanel();
             } catch (RemoteException ex) {
             }
         }
@@ -364,87 +364,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 }
             }
         });
-    }
-
-    @Override
-    public void setImeShowStatus(boolean enabled) {
-        if (mBar != null) {
-            try {
-                mBar.setImeShowStatus(enabled);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void setAutoRotate(boolean enabled) {
-        if (mBar != null) {
-            try {
-                mBar.setAutoRotate(enabled);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleNotificationShade() {
-        if (mBar != null) {
-            try {
-                mBar.toggleNotificationShade();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleQSShade() {
-        if (mBar != null) {
-            try {
-                mBar.toggleQSShade();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleStatusBar(boolean enable) {
-        if (mBar != null) {
-            try {
-                mBar.toggleStatusBar(enable);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleWidgets() {
-        if (mBar != null) {
-            try {
-                mBar.toggleWidgets();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleScreenshot() {
-        if (mBar != null) {
-            try {
-                mBar.toggleScreenshot();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleLastApp() {
-        if (mBar != null) {
-            try {
-                mBar.toggleLastApp();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void toggleKillApp() {
-        if (mBar != null) {
-            try {
-                mBar.toggleKillApp();
-            } catch (RemoteException ex) {}
-        }
     }
 
     @Override

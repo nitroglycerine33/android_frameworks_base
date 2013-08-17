@@ -116,6 +116,17 @@ public final class BluetoothUuid {
     public static boolean isBnep(ParcelUuid uuid) {
         return uuid.equals(BNEP);
     }
+
+
+    public static boolean isMessageAccessServer(ParcelUuid uuid) {
+        return uuid.equals(MessageAccessServer);
+    }
+
+    public static boolean isMessageNotificationServer(ParcelUuid uuid) {
+        return uuid.equals(MessageNotificationServer);
+    }
+
+
     /**
      * Returns true if ParcelUuid is present in uuidArray
      *
@@ -133,14 +144,6 @@ public final class BluetoothUuid {
             if (element.equals(uuid)) return true;
         }
         return false;
-    }
-
-    public static boolean isMessageAccessServer(ParcelUuid uuid) {
-        return uuid.equals(MessageAccessServer);
-    }
-
-    public static boolean isMessageNotificationServer(ParcelUuid uuid) {
-        return uuid.equals(MessageNotificationServer);
     }
 
     /**

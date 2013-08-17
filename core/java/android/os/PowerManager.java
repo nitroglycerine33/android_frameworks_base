@@ -232,22 +232,10 @@ public final class PowerManager {
     public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
 
     /**
-     * Brightness value to use when battery is low.
-     * @hide
-     */
-    public static final int BRIGHTNESS_LOW_BATTERY = 10;
-
-    /**
      * Brightness value for fully on.
      * @hide
      */
     public static final int BRIGHTNESS_ON = 255;
-
-    /**
-     * Brightness value for dim backlight.
-     * @hide
-     */
-    public static final int BRIGHTNESS_DIM = 20;
 
     /**
      * Brightness value for fully off.
@@ -344,19 +332,6 @@ public final class PowerManager {
     public int getDefaultScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingDefault);
-    }
-
-    /**
-     * Gets the minimum screen brightness.
-     * This is the lowest possible screen brightness; the screen will
-     * never become dimmer than that.
-     * @hide
-     */
-    public int getMinimumAbsoluteScreenBrightness() {
-        int minSetting = getMinimumScreenBrightnessSetting();
-        int dimSetting = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDim);
-        return Math.min(minSetting, dimSetting);
     }
 
     /**
@@ -880,22 +855,4 @@ public final class PowerManager {
         } catch (RemoteException e) {
         }
     }
-
-    /**
-     * sets the keyboard LED state
-     *
-     * @param on boolean state
-     * @param key 1 for caps, 2 for fn
-     *
-     * {@hide}
-     */
-    public void setKeyboardLight(boolean on, int key)
-    {
-        try {
-            mService.setKeyboardLight(on, key);
-        } catch (RemoteException e) {
-        }
-    }
-
-
 }

@@ -232,7 +232,6 @@ public class NetworkController extends BroadcastReceiver {
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
-        filter.addAction("com.android.settings.LABEL_CHANGED");
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -325,10 +324,6 @@ public class NetworkController extends BroadcastReceiver {
         notifySignalsChangedCallbacks(cb);
     }
 
-    public void removeNetworkSignalChangedCallback(NetworkSignalChangedCallback cb) {
-        mSignalsChangedCallbacks.remove(cb);
-    }
-
     public void refreshSignalCluster(SignalCluster cluster) {
         cluster.setWifiIndicators(
                 // only show wifi in the cluster if connected or if wifi-only
@@ -411,8 +406,6 @@ public class NetworkController extends BroadcastReceiver {
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                  action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity(intent);
-            refreshViews();
-        } else if (action.equals("com.android.settings.LABEL_CHANGED")) {
             refreshViews();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
             refreshLocale();
@@ -696,20 +689,11 @@ public class NetworkController extends BroadcastReceiver {
                             R.string.accessibility_data_connection_3g);
                     break;
                 case TelephonyManager.NETWORK_TYPE_LTE:
-                    boolean show4GforLTE = mContext.getResources().getBoolean(R.bool.config_show4GForLTE);
-                    if (show4GforLTE) {
-                        mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
-                        mDataTypeIconId = R.drawable.stat_sys_data_connected_4g;
-                        mQSDataTypeIconId = R.drawable.ic_qs_signal_4g;
-                        mContentDescriptionDataType = mContext.getString(
-                                R.string.accessibility_data_connection_4g);
-                    } else {
-                        mDataIconList = TelephonyIcons.DATA_LTE[mInetCondition];
-                        mDataTypeIconId = R.drawable.stat_sys_data_connected_lte;
-                        mQSDataTypeIconId = R.drawable.ic_qs_signal_lte;
-                        mContentDescriptionDataType = mContext.getString(
-                                R.string.accessibility_data_connection_lte);
-                    }
+                    mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_4g;
+                    mQSDataTypeIconId = R.drawable.ic_qs_signal_4g;
+                    mContentDescriptionDataType = mContext.getString(
+                            R.string.accessibility_data_connection_4g);
                     break;
                 default:
                     if (!mShowAtLeastThreeGees) {
@@ -1044,8 +1028,6 @@ public class NetworkController extends BroadcastReceiver {
         String mobileLabel = "";
         int N;
         final boolean emergencyOnly = isEmergencyOnly();
-        final String customLabel = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.CUSTOM_CARRIER_LABEL);
 
         if (!mHasMobileDataFeature) {
             mDataSignalIconId = mPhoneSignalIconId = 0;
@@ -1198,15 +1180,6 @@ public class NetworkController extends BroadcastReceiver {
             } else if (mPhone.isNetworkRoaming()) {
                 mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
                 mQSDataTypeIconId = R.drawable.ic_qs_signal_r;
-            }
-        }
-
-        if (customLabel != null && customLabel.trim().length() > 0) {
-            combinedLabel = customLabel;
-            mobileLabel = customLabel;
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.NOTIFICATION_SHOW_WIFI_SSID, 0) == 0) {
-                wifiLabel = customLabel;
             }
         }
 
@@ -1557,4 +1530,3 @@ public class NetworkController extends BroadcastReceiver {
     }
 
 }
-

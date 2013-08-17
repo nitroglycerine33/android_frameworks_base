@@ -58,18 +58,6 @@ import java.util.List;
  * developer guide.</p>
  * </div>
  *
- * @attr ref android.R.styleable#AccessibilityService_accessibilityEventTypes
- * @attr ref android.R.styleable#AccessibilityService_accessibilityFeedbackType
- * @attr ref android.R.styleable#AccessibilityService_accessibilityFlags
- * @attr ref android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
- * @attr ref android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
- * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
- * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
- * @attr ref android.R.styleable#AccessibilityService_description
- * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
- * @attr ref android.R.styleable#AccessibilityService_packageNames
- * @attr ref android.R.styleable#AccessibilityService_settingsActivity
- *
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
@@ -80,27 +68,23 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     /**
      * Capability: This accessibility service can retrieve the active window content.
-     * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
      */
     public static final int CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 0x00000001;
 
     /**
      * Capability: This accessibility service can request touch exploration mode in which
      * touched items are spoken aloud and the UI can be explored via gestures.
-     * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
      */
     public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 0x00000002;
 
     /**
      * Capability: This accessibility service can request enhanced web accessibility
      * enhancements. For example, installing scripts to make app content more accessible.
-     * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
      */
     public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000004;
 
     /**
-     * Capability: This accessibility service can request to filter the key event stream.
-     * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
+      * Capability: This accessibility service can request to filter the key event stream.
      */
     public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 0x00000008;
 
@@ -229,7 +213,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      * the first time they are run, if this flag is specified, a dialog is
      * shown to the user to confirm enabling explore by touch.
      * </p>
-     * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
      */
     public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 0x0000004;
 
@@ -249,7 +232,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      * true, otherwise this flag will be ignored. For how to declare the meta-data
      * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
      * </p>
-     * @see android.R.styleable#AccessibilityService_canRequestEnhancedWebAccessibility
      */
     public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000008;
 
@@ -278,7 +260,6 @@ public class AccessibilityServiceInfo implements Parcelable {
      * otherwise this flag will be ignored. For how to declare the meta-data
      * of a service refer to {@value AccessibilityService#SERVICE_META_DATA}.
      * </p>
-     * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
      */
     public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 0x00000020;
 

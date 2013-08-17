@@ -152,11 +152,6 @@ public class PhoneNumberUtils
         String number = null;
 
         Uri uri = intent.getData();
-
-        if (uri == null) {
-            return null;
-        }
-
         String scheme = uri.getScheme();
 
         if (scheme.equals("tel") || scheme.equals("sip")) {

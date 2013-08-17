@@ -71,7 +71,6 @@ import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
 import android.net.wifi.WifiStateTracker;
-import android.net.wimax.WimaxHelper;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -410,17 +409,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         // setup our unique device name
-        String hostname = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.DEVICE_HOSTNAME);
-        if (TextUtils.isEmpty(hostname) && TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
+        if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
             String id = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             if (id != null && id.length() > 0) {
                 String name = new String("android-").concat(id);
                 SystemProperties.set("net.hostname", name);
             }
-        } else {
-            SystemProperties.set("net.hostname", hostname);
         }
 
         // read our default dns server ip
@@ -675,6 +670,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Class wimaxStateTrackerClass = null;
         Class wimaxServiceClass = null;
         Class wimaxManagerClass;
+        String wimaxJarLocation;
+        String wimaxLibLocation;
         String wimaxManagerClassName;
         String wimaxServiceClassName;
         String wimaxStateTrackerClassName;
@@ -686,6 +683,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (isWimaxEnabled) {
             try {
+                wimaxJarLocation = context.getResources().getString(
+                        com.android.internal.R.string.config_wimaxServiceJarLocation);
+                wimaxLibLocation = context.getResources().getString(
+                        com.android.internal.R.string.config_wimaxNativeLibLocation);
                 wimaxManagerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxManagerClassname);
                 wimaxServiceClassName = context.getResources().getString(
@@ -693,7 +694,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 wimaxStateTrackerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxStateTrackerClassname);
 
-                wimaxClassLoader = WimaxHelper.getWimaxClassLoader(context);
+                if (DBG) log("wimaxJarLocation: " + wimaxJarLocation);
+                wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
+                        new ContextWrapper(context).getCacheDir().getAbsolutePath(),
+                        wimaxLibLocation, ClassLoader.getSystemClassLoader());
 
                 try {
                     wimaxManagerClass = wimaxClassLoader.loadClass(wimaxManagerClassName);
@@ -4087,7 +4091,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private String getMobileRedirectedProvisioningUrl() {
         String url = getProvisioningUrlBaseFromFile(REDIRECTED_PROVISIONING);
         if (TextUtils.isEmpty(url)) {
-            url = mContext.getResources().getString(R.string.mobile_redirected_provisioning_url);
+            url = "false";
         }
         return url;
     }
@@ -4096,7 +4100,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceConnectivityInternalPermission();
         String url = getProvisioningUrlBaseFromFile(PROVISIONING);
         if (TextUtils.isEmpty(url)) {
-            url = mContext.getResources().getString(R.string.mobile_provisioning_url);
+            url = "http://google.com";
             log("getProvisioningUrl: mobile_provisioining_url from resource =" + url);
         } else {
             log("getProvisioningUrl: mobile_provisioning_url from File =" + url);
