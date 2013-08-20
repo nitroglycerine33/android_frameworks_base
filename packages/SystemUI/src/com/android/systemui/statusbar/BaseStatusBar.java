@@ -138,11 +138,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
-    protected abstract void refreshLayout(int layoutDirection);
-
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+
+    private boolean mShowNotificationCounts;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -208,6 +208,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        mShowNotificationCounts = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_NOTIF_COUNT, 0) == 1;
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -300,16 +303,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         return notificationUserId == UserHandle.USER_ALL
                 || thisUserId == notificationUserId;
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        final Locale newLocale = mContext.getResources().getConfiguration().locale;
-        if (! newLocale.equals(mLocale)) {
-            mLocale = newLocale;
-            mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
-            refreshLayout(mLayoutDirection);
-        }
     }
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
