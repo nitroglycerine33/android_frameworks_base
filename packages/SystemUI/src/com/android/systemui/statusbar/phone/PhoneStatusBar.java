@@ -2777,19 +2777,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void onChange(boolean selfChange) {
             onChange(selfChange, null);
-
-	setNotificationWallpaperHelper();
-
-        if (mSettingsContainer != null) {
-	        mQS.setupQuickSettings();
-            } 
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-
-	    setNotificationWallpaperHelper();
-
             if (mSettingsContainer != null) {
                 mQS.setupQuickSettings();
             }
@@ -2813,13 +2804,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_USBTETHER),
                     false, this);
             cr.registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.UI_MODE_IS_TOGGLED),
-                    false, this);
-            cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_WIFI),
-                    setNotificationWallpaperHelper();
-	        cr.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.NOTIF_ALPHA),
                     false, this);
         }
     }
