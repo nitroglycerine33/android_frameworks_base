@@ -86,7 +86,8 @@
             android:singleLine="true"
             android:paddingStart="6dip"
             android:layout_marginEnd="8dip"
-            android:gravity="center_vertical|start"
+            android:gravity="center_vertical|left"
+            android:clickable="false"
             />
 
         <TextView
