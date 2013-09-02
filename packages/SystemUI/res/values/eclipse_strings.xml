@@ -60,4 +60,7 @@
     <!-- Camera tile toasts -->
     <string name="quick_settings_camera_error_connect">Can\'t connect to camera</string>
 
+    <!-- QuickSettings: Profile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_profile_label">Profile</string>
+
 </resources>

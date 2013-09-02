@@ -543,6 +543,13 @@ class ContextImpl extends Context {
                 return new UserManager(ctx, service);
             }});
 
+
+        registerService(PROFILE_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    final Context outerContext = ctx.getOuterContext();
+                    return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
+                }});
+
         registerService("fm_receiver", new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService("fm_receiver");
