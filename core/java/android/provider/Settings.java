@@ -6630,81 +6630,18 @@ public final class Settings {
         public static final String BATTERY_PERCENTAGE_INDICATOR = "battery_percentage_indicator";
 
         /**
+         * Change battery percentage indicator color during charging
          *
          * @hide
          */
         public static final String BATTERY_PERCENTAGE_INDICATOR_PLUGGED = "battery_percentage_indicator_plugged";
 
         /**
-         * Whether double tapping the volume keys toggles the rotation lock or not.
-         * Boolean. Default true.
-         * @hide
-         */
-        public static final String DOUBLE_TAP_VOLUME_KEYS = "volume_keys_double_tap_action";
-
-        /**
-         * IME Switcher
+         * Hide Singal Bars
          *
          * @hide
          */
-        public static final String SHOW_STATUSBAR_IME_SWITCHER = "show_statusbar_ime_switcher";
-
-        /**
-         * Whether to display the ADB notification.
-         * @hide
-         */
-        public static final String ADB_NOTIFY = "adb_notify";
-
-       /**
-        *
-        * @hide
-        */
-        public static final String SYSTEMUI_NAVRING_AMOUNT = "systemui_navring_amount";
-
-       /**
-        *
-        * @hide
-        */
-        public static final String SYSTEMUI_NAVRING_LONG_ENABLE = "systemui_navring_long_enable";
-
-        /**
-         * Custom navring actions
-         *
-         * @hide
-         */
-        public static final String[] SYSTEMUI_NAVRING = new String[] {
-                "navring_0",
-                "navring_1",
-                "navring_2",
-                "navring_3",
-                "navring_4",
-        };
-
-        /**
-         * Custom navring long press actions
-         *
-         * @hide
-         */
-        public static final String[] SYSTEMUI_NAVRING_LONG = new String[] {
-                "navring_long_0",
-                "navring_long_1",
-                "navring_long_2",
-                "navring_long_3",
-                "navring_long_4",
-        };
-
-        /**
-         * Custom navring icons
-         *
-         * @hide
-         */
-        public static final String[] SYSTEMUI_NAVRING_ICON = new String[] {
-                "navring_icon_0",
-                "navring_icon_1",
-                "navring_icon_2",
-                "navring_icon_3",
-                "navring_icon_4",
-        };
+        public static final String STATUSBAR_HIDE_SIGNAL_BARS = "statusbar_hide_signal_bars";
 
         /**
          * Statusbar toggles style
@@ -6743,18 +6680,6 @@ public final class Settings {
         public static final String HIDE_BATTERY_ICON = "hide_battery_icon";
 
         /**
-         * Whether to use the custom quick unlock screen control
-         * @hide
-         */
-        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
-
-        /**
-         * Vibrate when expanding notifications
-         * @hide
-         */
-        public static final String VIBRATE_NOTIF_EXPAND = "vibrate_notif_expand";
-
-        /**
          * Whether to show statusbar signal text
          *
          * @hide
@@ -6767,12 +6692,6 @@ public final class Settings {
          * @hide
          */
         public static final String STATUSBAR_SIGNAL_TEXT_COLOR = "statusbar_signal_text_color";
-
-        /**
-         * The hostname for this device
-         * @hide
-         */
-        public static final String DEVICE_HOSTNAME = "device_hostname";
 
         /**
          * enable and disable fast toggle in settings
