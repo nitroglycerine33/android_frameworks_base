@@ -6661,7 +6661,12 @@ public final class Settings {
         public static final String QUICK_TOGGLE_VIBRATE = "statusbar_toggles_vibrate_on_click";
 
         /**
-         * Key to store Torch state.
+         * @hide
+         */
+        public static final String HIDE_BATTERY_ICON = "hide_battery_icon";
+
+        /**
+         * Whether to use the custom quick unlock screen control
          * @hide
          */
         public static final String TORCH_STATE = "torch_state";
