@@ -198,4 +198,10 @@ public class FavoriteUserToggle extends BaseToggle {
             reloadFavContactInfo();
         }
     }
+
+    @Override
+    public int getDefaultIconResId() {
+        return R.drawable.ic_qs_default_user;
+    }
+
 }
