@@ -888,12 +888,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentsContainer.drawFadedEdges(canvas, left, right, top, bottom);
     }
 
-    private boolean hasHWbuttons() {
-        int hardwareKeyMask = mContext.getResources()
-                .getInteger(com.android.internal.R.integer.config_deviceHardwareKeys);
-        return (hardwareKeyMask != 0);
-    }
-
     private int pxToDp(int px, Context context) {
         float d = context.getResources().getDisplayMetrics().density;
         return (int)(px * d);
