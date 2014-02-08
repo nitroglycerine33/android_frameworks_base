@@ -139,7 +139,7 @@ public class ToggleManager {
             if (deviceSupportsBluetooth()) {
                 toggleMap.put(BLUETOOTH_TOGGLE, BluetoothToggle.class);
             }
-            toggleMap.put(SWAGGER_TOGGLE, SwaggerToggle.class);
+            //toggleMap.put(SWAGGER_TOGGLE, SwaggerToggle.class);
             if (((Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE)).hasVibrator()) {
                 toggleMap.put(VIBRATE_TOGGLE, VibrateToggle.class);
                 toggleMap.put(SOUND_STATE_TOGGLE, SoundStateToggle.class);
@@ -161,7 +161,7 @@ public class ToggleManager {
             // || TelephonyManager.getLteOnGsmModeStatic() != 0) {
             // toggleMap.put(LTE_TOGGLE, LteToggle.class);
             // }
-            toggleMap.put(FAV_CONTACT_TOGGLE, FavoriteUserToggle.class);
+            //toggleMap.put(FAV_CONTACT_TOGGLE, FavoriteUserToggle.class);
             // toggleMap.put(NAVBAR_HIDE_TOGGLE, NavbarHideToggle.class);
             toggleMap.put(QUICKRECORD_TOGGLE, QuickRecordToggle.class);
             toggleMap.put(SLEEP_TOGGLE, SleepToggle.class);
