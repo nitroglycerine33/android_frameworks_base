@@ -13,7 +13,7 @@ import com.android.systemui.R;
 
 public class StayAwakeToggle extends StatefulToggle {
 
-    private static final String TAG = "AOKPInsomnia";
+    private static final String TAG = "ECLIPSEInsomnia";
     private static final String KEY_USER_TIMEOUT = "user_timeout";
     private static final int FALLBACK_SCREEN_TIMEOUT_VALUE = 30000;
     private static final int neverSleep = Integer.MAX_VALUE; // MAX_VALUE equates to approx 24 days

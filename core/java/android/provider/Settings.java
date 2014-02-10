@@ -767,9 +767,9 @@ public final class Settings {
     public static final String CALL_METHOD_GET_GLOBAL = "GET_global";
 
     /**
-     * @hide - Private call() method on SettingsProvider to read from 'aokp' table.
+     * @hide - Private call() method on SettingsProvider to read from 'eclipse' table.
      */
-    public static final String CALL_METHOD_GET_AOKP = "GET_aokp";
+    public static final String CALL_METHOD_GET_ECLIPSE = "GET_eclipse";
 
     /**
      * @hide - User handle argument extra to the fast-path call()-based requests
@@ -785,8 +785,8 @@ public final class Settings {
     /** @hide - Private call() method to write to 'global' table */
     public static final String CALL_METHOD_PUT_GLOBAL= "PUT_global";
 
-    /** @hide - Private call() method to write to 'aokp' table */
-    public static final String CALL_METHOD_PUT_AOKP = "PUT_aokp";
+    /** @hide - Private call() method to write to 'eclipse' table */
+    public static final String CALL_METHOD_PUT_ECLIPSE = "PUT_eclipse";
 
     /**
      * Activity Extra: Limit available options in launched activity based on the given authority.
@@ -6243,24 +6243,24 @@ public final class Settings {
     }
 
     /**
-     * AOKP settings, containing AOKP specific preferences.  This
+     * ECLIPSE settings, containing ECLIPSE specific preferences.  This
      * table holds simple name/value pairs.  There are convenience
      * functions for accessing individual settings entries.
      */
-    public static final class AOKP extends NameValueTable {
+    public static final class ECLIPSE extends NameValueTable {
         public static final String SYS_PROP_SETTING_VERSION = "sys.settings_system_version";
 
         /**
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/aokp");
+            Uri.parse("content://" + AUTHORITY + "/eclipse");
 
         private static final NameValueCache sNameValueCache = new NameValueCache(
                 SYS_PROP_SETTING_VERSION,
                 CONTENT_URI,
-                CALL_METHOD_GET_AOKP,
-                CALL_METHOD_PUT_AOKP);
+                CALL_METHOD_GET_ECLIPSE,
+                CALL_METHOD_PUT_ECLIPSE);
 
         /**
          * Look up a name in the database.
@@ -6753,6 +6753,12 @@ public final class Settings {
          * @hide
          */
         public static final String SWIPE_TO_SWITCH = "swipe_to_switch";
+		
+        /**
+         * Key to store Torch state.
+         * @hide
+         */
+        public static final String TORCH_STATE = "torch_state";
 
         /**
          * Whether to show the network status in the status bar

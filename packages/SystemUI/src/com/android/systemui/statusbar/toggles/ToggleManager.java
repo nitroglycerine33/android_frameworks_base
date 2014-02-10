@@ -149,7 +149,7 @@ public class ToggleManager {
             if (mContext.getSystemService(Context.NFC_SERVICE) != null) {
                 toggleMap.put(NFC_TOGGLE, NfcToggle.class);
             }
-            // toggleMap.put(TORCH_TOGGLE, TorchToggle.class);
+            toggleMap.put(TORCH_TOGGLE, TorchToggle.class);
             toggleMap.put(USB_TETHER_TOGGLE, UsbTetherToggle.class);
             // if
             // (((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
@@ -403,14 +403,14 @@ public class ToggleManager {
 
     public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mUserToggles = Settings.AOKP.getString(resolver, Settings.AOKP.QUICK_TOGGLES);
+        mUserToggles = Settings.ECLIPSE.getString(resolver, Settings.ECLIPSE.QUICK_TOGGLES);
         if(mUserToggles == null) {
             mUserToggles = "";
         }
-        int columnCount = Settings.AOKP.getInt(resolver, Settings.AOKP.QUICK_TOGGLES_PER_ROW,
+        int columnCount = Settings.ECLIPSE.getInt(resolver, Settings.ECLIPSE.QUICK_TOGGLES_PER_ROW,
                 mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
 
-        mStyle = Settings.AOKP.getInt(resolver, Settings.AOKP.TOGGLES_STYLE,
+        mStyle = Settings.ECLIPSE.getInt(resolver, Settings.ECLIPSE.TOGGLES_STYLE,
                 ToggleManager.STYLE_TILE);
 
         for (int i = 0; i < mContainers.length; i++) {
@@ -457,14 +457,14 @@ public class ToggleManager {
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.QUICK_TOGGLES),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.QUICK_TOGGLES),
                     false, this);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.QUICK_TOGGLES_PER_ROW),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.QUICK_TOGGLES_PER_ROW),
                     false, this);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.TOGGLES_STYLE),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.TOGGLES_STYLE),
                     false, this);
             updateSettings();
         }
@@ -557,8 +557,8 @@ public class ToggleManager {
     }
 
     public static int getTextSize(Context c) {
-        int columnCount = Settings.AOKP.getInt(c.getContentResolver(),
-                Settings.AOKP.QUICK_TOGGLES_PER_ROW,
+        int columnCount = Settings.ECLIPSE.getInt(c.getContentResolver(),
+                Settings.ECLIPSE.QUICK_TOGGLES_PER_ROW,
                 c.getResources().getInteger(R.integer.quick_settings_num_columns));
         // adjust Tile Text Size based on column count
         switch (columnCount) {

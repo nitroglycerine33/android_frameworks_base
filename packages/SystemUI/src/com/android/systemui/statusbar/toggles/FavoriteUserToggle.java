@@ -69,8 +69,8 @@ public class FavoriteUserToggle extends BaseToggle {
 
     @Override
     public void onClick(View v) {
-        String lookupKey = Settings.AOKP.getString(mContext.getContentResolver(),
-                Settings.AOKP.QUICK_TOGGLE_FAV_CONTACT);
+        String lookupKey = Settings.ECLIPSE.getString(mContext.getContentResolver(),
+                Settings.ECLIPSE.QUICK_TOGGLE_FAV_CONTACT);
 
         if (lookupKey != null && lookupKey.length() > 0) {
             dismissKeyguard();
@@ -118,8 +118,8 @@ public class FavoriteUserToggle extends BaseToggle {
                 Drawable avatar = mContext.getResources()
                         .getDrawable(R.drawable.ic_qs_default_user);
                 Bitmap rawAvatar = null;
-                String lookupKey = Settings.AOKP.getString(mContext.getContentResolver(),
-                        Settings.AOKP.QUICK_TOGGLE_FAV_CONTACT);
+                String lookupKey = Settings.ECLIPSE.getString(mContext.getContentResolver(),
+                        Settings.ECLIPSE.QUICK_TOGGLE_FAV_CONTACT);
                 if (lookupKey != null && lookupKey.length() > 0) {
                     Uri lookupUri = Uri.withAppendedPath(
                             ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
@@ -183,8 +183,8 @@ public class FavoriteUserToggle extends BaseToggle {
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.QUICK_TOGGLE_FAV_CONTACT),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.QUICK_TOGGLE_FAV_CONTACT),
                     false, this);
         }
 

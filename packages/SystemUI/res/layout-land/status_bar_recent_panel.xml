@@ -62,10 +62,10 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:scaleType="center"
-            android:layout_gravity="top|right"
+            android:layout_gravity="bottom|right"
             android:src="@drawable/ic_notify_clear" />
 
-        <include layout="@layout/aokp_recents_rambar"
+        <include layout="@layout/eclipse_recents_rambar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

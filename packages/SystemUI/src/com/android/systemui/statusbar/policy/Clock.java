@@ -117,17 +117,17 @@ public class Clock extends TextView implements DemoMode {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
             getContext().registerReceiver(mIntentReceiver, filter, null, getHandler());
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.STATUSBAR_CLOCK_AM_PM_STYLE),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.STATUSBAR_CLOCK_AM_PM_STYLE),
                     false, mSettingsObserver);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.STATUSBAR_CLOCK_STYLE),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.STATUSBAR_CLOCK_STYLE),
                     false, mSettingsObserver);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.STATUSBAR_CLOCK_COLOR),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.STATUSBAR_CLOCK_COLOR),
                     false, mSettingsObserver);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.STATUSBAR_CLOCK_WEEKDAY),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.STATUSBAR_CLOCK_WEEKDAY),
                     false, mSettingsObserver);
         }
 
@@ -247,14 +247,14 @@ public class Clock extends TextView implements DemoMode {
         ContentResolver resolver = mContext.getContentResolver();
         int defaultColor = getResources().getColor(R.color.status_bar_clock_color);
 
-        mAmPmStyle = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.STATUSBAR_CLOCK_AM_PM_STYLE, AM_PM_STYLE_GONE);
-        mClockStyle = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.STATUSBAR_CLOCK_STYLE, STYLE_CLOCK_RIGHT);
-        mWeekdayStyle = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.STATUSBAR_CLOCK_WEEKDAY, WEEKDAY_STYLE_GONE);
-        mClockColor = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.STATUSBAR_CLOCK_COLOR, defaultColor);
+        mAmPmStyle = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.STATUSBAR_CLOCK_AM_PM_STYLE, AM_PM_STYLE_GONE);
+        mClockStyle = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.STATUSBAR_CLOCK_STYLE, STYLE_CLOCK_RIGHT);
+        mWeekdayStyle = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.STATUSBAR_CLOCK_WEEKDAY, WEEKDAY_STYLE_GONE);
+        mClockColor = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.STATUSBAR_CLOCK_COLOR, defaultColor);
         if (mClockColor == Integer.MIN_VALUE) {
             // flag to reset the color
             mClockColor = defaultColor;

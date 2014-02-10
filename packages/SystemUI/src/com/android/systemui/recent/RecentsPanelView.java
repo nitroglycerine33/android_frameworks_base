@@ -409,8 +409,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 root.setDrawDuringWindowsAnimating(true);
             }
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.RAM_USAGE_BAR),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.RAM_USAGE_BAR),
                     false, mObserver);
             updateSettings();
             updateView();
@@ -532,7 +532,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRamUsageBar = (LinearColorBar) findViewById(R.id.ram_usage_bar);
         mForegroundProcessText = (TextView) findViewById(R.id.foregroundText);
         mBackgroundProcessText = (TextView) findViewById(R.id.backgroundText);
-        mRamUsageBarShadow = findViewById(R.id.aokp_rambar_shadow);
+        mRamUsageBarShadow = findViewById(R.id.eclipse_rambar_shadow);
         mHandler.post(updateRamBarTask);
     }
 
@@ -926,8 +926,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     };
 
     public void updateSettings() {
-        ramBarEnabled = Settings.AOKP.getBoolean(mContext.getContentResolver(),
-                Settings.AOKP.RAM_USAGE_BAR, true);
+        ramBarEnabled = Settings.ECLIPSE.getBoolean(mContext.getContentResolver(),
+                Settings.ECLIPSE.RAM_USAGE_BAR, true);
     }
 
     private void updateView() {

@@ -55,8 +55,8 @@ public class QuickSettingsContainerView extends FrameLayout {
     void updateResources() {
         Resources r = getContext().getResources();
         mCellGap = r.getDimension(R.dimen.quick_settings_cell_gap);
-        mNumColumns = Settings.AOKP.getInt(
-                mContext.getContentResolver(), Settings.AOKP.QUICK_TOGGLES_PER_ROW, 
+        mNumColumns = Settings.ECLIPSE.getInt(
+                mContext.getContentResolver(), Settings.ECLIPSE.QUICK_TOGGLES_PER_ROW, 
                 r.getInteger(R.integer.quick_settings_num_columns));
         requestLayout();
     }

@@ -69,7 +69,7 @@
             android:layout_gravity="bottom|left"
             android:src="@drawable/ic_notify_clear" />
 
-        <include layout="@layout/aokp_recents_rambar"
+        <include layout="@layout/eclipse_recents_rambar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

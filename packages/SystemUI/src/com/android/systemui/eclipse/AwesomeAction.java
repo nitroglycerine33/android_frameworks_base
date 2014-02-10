@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.aokp;
+package com.android.systemui.eclipse;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -54,7 +54,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
-import static com.android.internal.util.aokp.AwesomeConstants.*;
+import static com.android.internal.util.eclipse.AwesomeConstants.*;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.net.URISyntaxException;
@@ -175,7 +175,7 @@ public class AwesomeAction {
                 break;
             case ACTION_TORCH:
                 Intent intentTorch = new Intent("android.intent.action.MAIN");
-                intentTorch.setComponent(ComponentName.unflattenFromString("com.aokp.Torch/.TorchActivity"));
+                intentTorch.setComponent(ComponentName.unflattenFromString("com.eclipse.Torch/.TorchActivity"));
                 intentTorch.addCategory("android.intent.category.LAUNCHER");
                 intentTorch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(intentTorch);

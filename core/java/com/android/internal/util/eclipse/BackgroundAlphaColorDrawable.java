@@ -1,5 +1,5 @@
 
-package com.android.internal.util.aokp;
+package com.android.internal.util.eclipse;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

@@ -31,7 +31,7 @@ public class SettingsToggle extends BaseToggle {
     public boolean onLongClick(View v) {
         Intent intent = new Intent("android.intent.action.MAIN");
         intent.setComponent(ComponentName
-                .unflattenFromString("com.aokp.romcontrol/.MainActivity"));
+                .unflattenFromString("com.eclipse.xcontrol/.MainActivity"));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
 

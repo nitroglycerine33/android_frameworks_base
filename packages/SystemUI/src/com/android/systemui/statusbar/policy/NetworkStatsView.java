@@ -90,12 +90,12 @@ public class NetworkStatsView extends LinearLayout {
 
         public void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.AOKP.getUriFor(
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS), false, this);
-            resolver.registerContentObserver(Settings.AOKP.getUriFor(
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS_UPDATE_INTERVAL), false, this);
-            resolver.registerContentObserver(Settings.AOKP.getUriFor(
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS_TEXT_COLOR), false, this);
+            resolver.registerContentObserver(Settings.ECLIPSE.getUriFor(
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS), false, this);
+            resolver.registerContentObserver(Settings.ECLIPSE.getUriFor(
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS_UPDATE_INTERVAL), false, this);
+            resolver.registerContentObserver(Settings.ECLIPSE.getUriFor(
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS_TEXT_COLOR), false, this);
             onChange(true);
         }
 
@@ -116,16 +116,16 @@ public class NetworkStatsView extends LinearLayout {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             boolean isScreenOn = pm.isScreenOn();
 
-            mActivated = (Settings.AOKP.getInt(mContext.getContentResolver(),
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS, 0)) == 1 && networkAvailable;
+            mActivated = (Settings.ECLIPSE.getInt(mContext.getContentResolver(),
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS, 0)) == 1 && networkAvailable;
 
-            mRefreshInterval = Settings.AOKP.getLong(mContext.getContentResolver(),
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS_UPDATE_INTERVAL, 500);
+            mRefreshInterval = Settings.ECLIPSE.getLong(mContext.getContentResolver(),
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS_UPDATE_INTERVAL, 500);
 
             int newColor = 0;
             ContentResolver resolver = getContext().getContentResolver();
-            newColor = Settings.AOKP.getInt(resolver,
-                    Settings.AOKP.STATUS_BAR_NETWORK_STATS_TEXT_COLOR,mNetStatsColor);
+            newColor = Settings.ECLIPSE.getInt(resolver,
+                    Settings.ECLIPSE.STATUS_BAR_NETWORK_STATS_TEXT_COLOR,mNetStatsColor);
             if (newColor < 0 && newColor != mNetStatsColor) {
                 mNetStatsColor = newColor;
                 if (mTextViewTx != null) mTextViewTx.setTextColor(mNetStatsColor);

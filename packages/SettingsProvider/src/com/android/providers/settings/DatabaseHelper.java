@@ -82,13 +82,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
-    private static final String TABLE_AOKP = "aokp";
+    private static final String TABLE_ECLIPSE = "eclipse";
 
     static {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
         mValidTables.add(TABLE_GLOBAL);
-        mValidTables.add(TABLE_AOKP);
+        mValidTables.add(TABLE_ECLIPSE);
         mValidTables.add("bluetooth_devices");
         mValidTables.add("bookmarks");
 
@@ -139,13 +139,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX globalIndex1 ON global (name);");
     }
 
-    private void createAOKPTable(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS aokp (" +
+    private void createECLIPSETable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS eclipse (" +
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "name TEXT UNIQUE ON CONFLICT REPLACE," +
                 "value TEXT" +
                 ");");
-        db.execSQL("CREATE INDEX IF NOT EXISTS aokpIndex1 ON aokp (name);");
+        db.execSQL("CREATE INDEX IF NOT EXISTS eclipseIndex1 ON eclipse (name);");
     }
 
     @Override
@@ -159,7 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         createSecureTable(db);
 
-        createAOKPTable(db);
+        createECLIPSETable(db);
 
         // Only create the global table for the singleton 'owner' user
         if (mUserHandle == UserHandle.USER_OWNER) {
@@ -1569,10 +1569,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     if (stmt != null) stmt.close();
                 }
             }
-            //add AOKP table
+            //add ECLIPSE table
             db.beginTransaction();
             try {
-                createAOKPTable(db);
+                createECLIPSETable(db);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -1598,8 +1598,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
             db.execSQL("DROP TABLE IF EXISTS favorites");
-            db.execSQL("DROP TABLE IF EXISTS aokp");
-            db.execSQL("DROP INDEX IF EXISTS aokpIndex1");
+            db.execSQL("DROP TABLE IF EXISTS eclipse");
+            db.execSQL("DROP INDEX IF EXISTS eclipseIndex1");
             onCreate(db);
 
             // Added for diagnosing settings.db wipes after the fact
@@ -1982,7 +1982,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (mUserHandle == UserHandle.USER_OWNER) {
             loadGlobalSettings(db);
         }
-        loadAokpSettings(db);
+        loadEclipseSettings(db);
     }
 
     private void loadSystemSettings(SQLiteDatabase db) {
@@ -2054,10 +2054,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.bool.def_haptic_feedback);
     }
 
-    private void loadAokpSettings(SQLiteDatabase db) {
+    private void loadEclipseSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = null;
         try {
-            //stmt = db.compileStatement("INSERT OR IGNORE INTO aokp(name,value)"
+            //stmt = db.compileStatement("INSERT OR IGNORE INTO eclipse(name,value)"
             //        + " VALUES(?,?);");
             // TODO: Preload any required default values
         } finally {

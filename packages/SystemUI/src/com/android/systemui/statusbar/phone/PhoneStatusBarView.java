@@ -63,8 +63,8 @@ public class PhoneStatusBarView extends PanelBar {
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
         mBarTransitions = new PhoneStatusBarTransitions(this);
      // no need for observer, sysui gets killed when the style is changed.
-        mToggleStyle = Settings.AOKP.getInt(mContext.getContentResolver(),
-                Settings.AOKP.TOGGLES_STYLE, 0);
+        mToggleStyle = Settings.ECLIPSE.getInt(mContext.getContentResolver(),
+                Settings.ECLIPSE.TOGGLES_STYLE, 0);
     }
 
     public BarTransitions getBarTransitions() {

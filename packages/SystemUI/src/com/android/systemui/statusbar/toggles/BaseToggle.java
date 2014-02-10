@@ -334,10 +334,10 @@ public abstract class BaseToggle
     private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
 
-        mCollapsePref = Settings.AOKP.getBoolean(resolver,
-                Settings.AOKP.SHADE_COLLAPSE_ALL, false);
-        mVibratePref = Settings.AOKP.getBoolean(resolver,
-                Settings.AOKP.QUICK_TOGGLE_VIBRATE, false);
+        mCollapsePref = Settings.ECLIPSE.getBoolean(resolver,
+                Settings.ECLIPSE.SHADE_COLLAPSE_ALL, false);
+        mVibratePref = Settings.ECLIPSE.getBoolean(resolver,
+                Settings.ECLIPSE.QUICK_TOGGLE_VIBRATE, false);
         mTactileFeedbackEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
     }
@@ -350,11 +350,11 @@ public abstract class BaseToggle
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
 
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.SHADE_COLLAPSE_ALL),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.SHADE_COLLAPSE_ALL),
                     false, this);
-            resolver.registerContentObserver(Settings.AOKP
-                    .getUriFor(Settings.AOKP.QUICK_TOGGLE_VIBRATE),
+            resolver.registerContentObserver(Settings.ECLIPSE
+                    .getUriFor(Settings.ECLIPSE.QUICK_TOGGLE_VIBRATE),
                     false, this);
             resolver.registerContentObserver(Settings.System
                     .getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),

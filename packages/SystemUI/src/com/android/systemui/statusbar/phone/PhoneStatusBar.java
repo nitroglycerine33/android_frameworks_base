@@ -1252,10 +1252,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mStatusBarView == null) return;
         View clock = mStatusBarView.findViewById(R.id.clock);
         View cclock = mStatusBarView.findViewById(R.id.center_clock);
-        boolean rightClock = (Settings.AOKP.getInt(mContext.getContentResolver(),
-                Settings.AOKP.STATUSBAR_CLOCK_STYLE, 1) == 1);
-        boolean centerClock = (Settings.AOKP.getInt(mContext.getContentResolver(),
-                Settings.AOKP.STATUSBAR_CLOCK_STYLE, 1) == 2);
+        boolean rightClock = (Settings.ECLIPSE.getInt(mContext.getContentResolver(),
+                Settings.ECLIPSE.STATUSBAR_CLOCK_STYLE, 1) == 1);
+        boolean centerClock = (Settings.ECLIPSE.getInt(mContext.getContentResolver(),
+                Settings.ECLIPSE.STATUSBAR_CLOCK_STYLE, 1) == 2);
         if (rightClock && clock != null) {
             clock.setVisibility(show ? View.VISIBLE : View.GONE);
         }
@@ -2962,8 +2962,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.AOKP.getUriFor(
-                    Settings.AOKP.TOGGLES_STYLE), false, this);
+            resolver.registerContentObserver(Settings.ECLIPSE.getUriFor(
+                    Settings.ECLIPSE.TOGGLES_STYLE), false, this);
         }
 
         @Override
@@ -2974,7 +2974,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateSettings();
-            if(uri != null && uri.equals(Settings.AOKP.getUriFor(Settings.AOKP.TOGGLES_STYLE))) {
+            if(uri != null && uri.equals(Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.TOGGLES_STYLE))) {
                 recreateStatusBar();
             }
         }
@@ -2982,7 +2982,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private void updateSettings() {
         ContentResolver cr = mContext.getContentResolver();
-        mToggleStyle = Settings.System.getInt(cr, Settings.AOKP.TOGGLES_STYLE,ToggleManager.STYLE_TILE);
+        mToggleStyle = Settings.System.getInt(cr, Settings.ECLIPSE.TOGGLES_STYLE,ToggleManager.STYLE_TILE);
         if(mToggleManager != null) {
             mToggleManager.updateSettings();
         }

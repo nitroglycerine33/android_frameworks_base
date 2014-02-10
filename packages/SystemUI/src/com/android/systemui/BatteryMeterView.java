@@ -171,7 +171,7 @@ public class BatteryMeterView extends View implements DemoMode {
         }
 
         getContext().getContentResolver().registerContentObserver(
-                Settings.AOKP.getUriFor(Settings.AOKP.HIDE_BATTERY_ICON),
+                Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.HIDE_BATTERY_ICON),
                 false, mObserver);
         updateSettings();
     }
@@ -406,8 +406,8 @@ public class BatteryMeterView extends View implements DemoMode {
     }
 
     private void updateSettings() {
-        boolean enabled = Settings.AOKP.getBoolean(mContext.getContentResolver(),
-                                Settings.AOKP.HIDE_BATTERY_ICON, false);
+        boolean enabled = Settings.ECLIPSE.getBoolean(mContext.getContentResolver(),
+                                Settings.ECLIPSE.HIDE_BATTERY_ICON, false);
         if (enabled) {
             setVisibility(View.GONE);
         } else {

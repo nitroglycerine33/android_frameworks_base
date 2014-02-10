@@ -67,8 +67,8 @@ public class NotificationPanelView extends PanelView {
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mToggleStyle = Settings.AOKP.getInt(context.getContentResolver(),
-                Settings.AOKP.TOGGLES_STYLE, 0);
+        mToggleStyle = Settings.ECLIPSE.getInt(context.getContentResolver(),
+                Settings.ECLIPSE.TOGGLES_STYLE, 0);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -91,42 +91,42 @@ public class NotificationPanelView extends PanelView {
         mEnableObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                mFastToggleEnabled = Settings.AOKP.getBoolean(resolver,
-                        Settings.AOKP.FAST_TOGGLE, false);
-                mToggleStyle = Settings.AOKP.getInt(resolver,
-                        Settings.AOKP.TOGGLES_STYLE, 0);
-                mSwipeToSwitch = mToggleStyle >= 1 ? false : Settings.AOKP.getBoolean(resolver,
-                        Settings.AOKP.SWIPE_TO_SWITCH, false);
+                mFastToggleEnabled = Settings.ECLIPSE.getBoolean(resolver,
+                        Settings.ECLIPSE.FAST_TOGGLE, false);
+                mToggleStyle = Settings.ECLIPSE.getInt(resolver,
+                        Settings.ECLIPSE.TOGGLES_STYLE, 0);
+                mSwipeToSwitch = mToggleStyle >= 1 ? false : Settings.ECLIPSE.getBoolean(resolver,
+                        Settings.ECLIPSE.SWIPE_TO_SWITCH, false);
             }
         };
 
         mChangeSideObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                mFastTogglePos = Settings.AOKP.getInt(resolver,
-                        Settings.AOKP.CHOOSE_FASTTOGGLE_SIDE, 1);
+                mFastTogglePos = Settings.ECLIPSE.getInt(resolver,
+                        Settings.ECLIPSE.CHOOSE_FASTTOGGLE_SIDE, 1);
             }
         };
 
         // Initialization
-        mFastToggleEnabled = Settings.AOKP.getBoolean(resolver,
-                Settings.AOKP.FAST_TOGGLE, false);
-        mFastTogglePos = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.CHOOSE_FASTTOGGLE_SIDE, 1);
-        mToggleStyle = Settings.AOKP.getInt(resolver,
-                Settings.AOKP.TOGGLES_STYLE, 0);
-        mSwipeToSwitch = mToggleStyle >= 1 ? false : Settings.AOKP.getBoolean(resolver,
-                Settings.AOKP.SWIPE_TO_SWITCH, false);
+        mFastToggleEnabled = Settings.ECLIPSE.getBoolean(resolver,
+                Settings.ECLIPSE.FAST_TOGGLE, false);
+        mFastTogglePos = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.CHOOSE_FASTTOGGLE_SIDE, 1);
+        mToggleStyle = Settings.ECLIPSE.getInt(resolver,
+                Settings.ECLIPSE.TOGGLES_STYLE, 0);
+        mSwipeToSwitch = mToggleStyle >= 1 ? false : Settings.ECLIPSE.getBoolean(resolver,
+                Settings.ECLIPSE.SWIPE_TO_SWITCH, false);
 
         resolver.registerContentObserver(
-                Settings.AOKP.getUriFor(Settings.AOKP.FAST_TOGGLE),
+                Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.FAST_TOGGLE),
                 true, mEnableObserver);
         resolver.registerContentObserver(
-                Settings.AOKP.getUriFor(Settings.AOKP.SWIPE_TO_SWITCH),
+                Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.SWIPE_TO_SWITCH),
                 true, mEnableObserver);
 
         resolver.registerContentObserver(
-                Settings.AOKP.getUriFor(Settings.AOKP.CHOOSE_FASTTOGGLE_SIDE),
+                Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.CHOOSE_FASTTOGGLE_SIDE),
                 true, mChangeSideObserver);
     }
 

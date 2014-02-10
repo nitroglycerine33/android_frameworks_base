@@ -1643,7 +1643,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
-                    Settings.AOKP.getUriFor(Settings.AOKP.STATUSBAR_HIDE_SIGNAL_BARS), false,
+                    Settings.ECLIPSE.getUriFor(Settings.ECLIPSE.STATUSBAR_HIDE_SIGNAL_BARS), false,
                     this);
             updateSettings();
         }
@@ -1655,8 +1655,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     }
 
     protected void updateSettings() {
-        mHideSignal = (Settings.AOKP.getInt(mContext.getContentResolver(),
-                Settings.AOKP.STATUSBAR_HIDE_SIGNAL_BARS, 0) == 1);
+        mHideSignal = (Settings.ECLIPSE.getInt(mContext.getContentResolver(),
+                Settings.ECLIPSE.STATUSBAR_HIDE_SIGNAL_BARS, 0) == 1);
         updateTelephonySignalStrength();
     }
 
