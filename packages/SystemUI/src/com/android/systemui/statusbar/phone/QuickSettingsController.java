@@ -26,7 +26,6 @@ import static com.android.internal.util.cm.QSConstants.TILE_CAMERA;
 import static com.android.internal.util.cm.QSConstants.TILE_DELIMITER;
 import static com.android.internal.util.cm.QSConstants.TILE_GPS;
 import static com.android.internal.util.cm.QSConstants.TILE_LOCKSCREEN;
-import static com.android.internal.util.cm.QSConstants.TILE_LTE;
 import static com.android.internal.util.cm.QSConstants.TILE_MOBILEDATA;
 import static com.android.internal.util.cm.QSConstants.TILE_NETWORKMODE;
 import static com.android.internal.util.cm.QSConstants.TILE_NFC;
@@ -68,7 +67,6 @@ import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
-import com.android.systemui.quicksettings.LteTile;
 import com.android.systemui.quicksettings.MobileNetworkTile;
 import com.android.systemui.quicksettings.MobileNetworkTypeTile;
 import com.android.systemui.quicksettings.NfcTile;
@@ -144,7 +142,6 @@ public class QuickSettingsController {
         boolean cameraSupported = QSUtils.deviceSupportsCamera();
         boolean bluetoothSupported = QSUtils.deviceSupportsBluetooth();
         boolean mobileDataSupported = QSUtils.deviceSupportsMobileData(mContext);
-        boolean lteSupported = QSUtils.deviceSupportsLte(mContext);
 
         if (!bluetoothSupported) {
             TILES_DEFAULT.remove(TILE_BLUETOOTH);
@@ -156,9 +153,6 @@ public class QuickSettingsController {
             TILES_DEFAULT.remove(TILE_NETWORKMODE);
         }
 
-        if (!lteSupported) {
-            TILES_DEFAULT.remove(TILE_LTE);
-        }
 
         // Read the stored list of tiles
         ContentResolver resolver = mContext.getContentResolver();
@@ -220,8 +214,6 @@ public class QuickSettingsController {
                 qs = new NfcTile(mContext, this);
             } else if (tile.equals(TILE_WIMAX)) {
                 // Not available yet
-            } else if (tile.equals(TILE_LTE)) {
-                qs = new LteTile(mContext, this);
             } else if (tile.equals(TILE_VOLUME)) {
                 qs = new VolumeTile(mContext, this, mHandler);
             }
