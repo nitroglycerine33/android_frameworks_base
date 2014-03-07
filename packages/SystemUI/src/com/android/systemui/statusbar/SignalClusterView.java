@@ -53,12 +53,10 @@ public class SignalClusterView
     private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
-    private boolean mEtherVisible = false;
-    private int mEtherIconId = 0;
-    private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
+    private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
 
     ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mEther;
+    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane;
     View mSpacer;
 
     Handler mHandler;
@@ -120,7 +118,6 @@ public class SignalClusterView
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
         mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
-        mEther          = (ImageView) findViewById(R.id.ethernet);
 
         apply();
     }
@@ -138,7 +135,6 @@ public class SignalClusterView
         mMobileType     = null;
         mSpacer         = null;
         mAirplane       = null;
-        mEther          = null;
 
         super.onDetachedFromWindow();
     }
@@ -171,15 +167,6 @@ public class SignalClusterView
     public void setIsAirplaneMode(boolean is, int airplaneIconId) {
         mIsAirplaneMode = is;
         mAirplaneIconId = airplaneIconId;
-
-        apply();
-    }
-
-    @Override
-    public void setEtherIndicators(boolean visible, int etherIcon, String contentDescription) {
-        mEtherVisible = visible;
-        mEtherIconId = etherIcon;
-        mEtherDescription = contentDescription;
 
         apply();
     }
@@ -260,14 +247,6 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
-        if (mEtherVisible) {
-            mEther.setVisibility(View.VISIBLE);
-            mEther.setImageResource(mEtherIconId);
-            mEther.setContentDescription(mEtherDescription);
-        } else {
-            mEther.setVisibility(View.GONE);
-        }
-
         if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
             mSpacer.setVisibility(View.INVISIBLE);
         } else {
@@ -292,7 +271,7 @@ public class SignalClusterView
         }
     }
 
-    public void updateSettings() {
+    private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
         mSignalClusterStyle = (Settings.System.getInt(resolver,
                 Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL));

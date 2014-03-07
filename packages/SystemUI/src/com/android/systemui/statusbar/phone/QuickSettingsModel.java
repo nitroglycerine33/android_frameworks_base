@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import java.util.List;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
@@ -31,7 +29,6 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.ConnectivityManager;
-import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -49,6 +46,8 @@ import com.android.systemui.settings.BrightnessController.BrightnessStateChangeC
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+
+import java.util.List;
 
 
 class QuickSettingsModel implements BluetoothStateChangeCallback,
@@ -537,9 +536,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // BatteryController callback
     @Override
-    public void onBatteryLevelChanged(int level, int status) {
+    public void onBatteryLevelChanged(int level, boolean pluggedIn) {
         mBatteryState.batteryLevel = level;
-        mBatteryState.pluggedIn = status == BatteryManager.BATTERY_STATUS_CHARGING;
+        mBatteryState.pluggedIn = pluggedIn;
         mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
     }
     void refreshBatteryTile() {
