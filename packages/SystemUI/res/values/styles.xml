@@ -56,20 +56,20 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Date" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">16dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
@@ -96,7 +96,7 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
