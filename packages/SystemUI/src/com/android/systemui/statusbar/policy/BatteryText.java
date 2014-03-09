@@ -113,7 +113,7 @@ public class BatteryText extends TextView {
 
 	//use holo blue light to allow theme changer to control this
 	mBattTextColor = mContext.getResources().getColor(
-	com.android.internal.R.color.holo_blue_light);
+	com.android.internal.R.color.white);
 
         setTextColor(mBattTextColor);
     }

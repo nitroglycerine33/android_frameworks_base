@@ -376,8 +376,8 @@ class QuickSettings {
                 @Override
                 public boolean onLongClick(View v) {
                     Intent controlPanelIntent = new Intent();
-                    controlPanelIntent.setClassName("com.TwinBlade.QSCP",
-                            "com.TwinBlade.QSCP.Main");
+                    controlPanelIntent.setClassName("com.eclipse.QSCP",
+                            "com.eclipse.QSCP.Main");
                     controlPanelIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(controlPanelIntent);
 
